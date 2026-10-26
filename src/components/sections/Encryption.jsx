@@ -8,17 +8,17 @@ const WORDS = [
     name: "Himanvic",
     subtitle: "Identity & Creator",
     description: "Student developer passionate about learning, building, and exploring systems.",
-    colors: ["#c084fc", "#a855f7", "#818cf8", "#38bdf8", "#ffffff"],
-    primary: "#c084fc",
-    glow: "rgba(192, 132, 252, 0.45)",
+    colors: ["#38bdf8", "#00f0ff", "#06b6d4", "#facc15", "#ffffff"],
+    primary: "#38bdf8",
+    glow: "rgba(56, 189, 248, 0.5)",
   },
   {
     name: "C++",
     subtitle: "Core Language",
     description: "Systems programming, algorithms, low-level mechanics, and performance fundamentals.",
-    colors: ["#3b82f6", "#60a5fa", "#38bdf8", "#93c5fd", "#ffffff"],
-    primary: "#3b82f6",
-    glow: "rgba(59, 130, 246, 0.45)",
+    colors: ["#38bdf8", "#0284c7", "#00f0ff", "#7dd3fc", "#ffffff"],
+    primary: "#38bdf8",
+    glow: "rgba(56, 189, 248, 0.55)",
   },
   {
     name: "Python",
@@ -26,23 +26,23 @@ const WORDS = [
     description: "Rapid prototyping, algorithmic experiments, simulation logic, and developer tooling.",
     colors: ["#facc15", "#f59e0b", "#38bdf8", "#fbbf24", "#ffffff"],
     primary: "#facc15",
-    glow: "rgba(250, 204, 21, 0.45)",
+    glow: "rgba(250, 204, 21, 0.55)",
   },
   {
     name: "Dynamics",
     subtitle: "Computational Physics & Motion",
     description: "Where algorithms, system mechanics, and real-time interactive simulation meet.",
-    colors: ["#ec4899", "#c084fc", "#a855f7", "#38bdf8", "#ffffff"],
-    primary: "#ec4899",
-    glow: "rgba(236, 72, 153, 0.45)",
+    colors: ["#00f0ff", "#38bdf8", "#0ea5e9", "#facc15", "#ffffff"],
+    primary: "#00f0ff",
+    glow: "rgba(0, 240, 255, 0.5)",
   },
   {
     name: "Curiosity",
     subtitle: "Core Philosophy",
     description: "Driven by asking 'how does it work under the hood?' and building to find out.",
-    colors: ["#ff9933", "#38bdf8", "#10b981", "#c084fc", "#ffffff"],
-    primary: "#ff9933",
-    glow: "rgba(255, 153, 51, 0.45)",
+    colors: ["#f59e0b", "#38bdf8", "#10b981", "#fbbf24", "#ffffff"],
+    primary: "#f59e0b",
+    glow: "rgba(245, 158, 11, 0.5)",
   },
 ];
 
@@ -404,12 +404,12 @@ const Encryption = () => {
       <div id="encryption" className="absolute -top-20" />
 
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-purple-700/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/3 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[130px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-cyan-600/12 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 left-1/3 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Top Header & Badge */}
       <div className="flex flex-col items-center text-center z-10 max-w-3xl">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 rounded-full bg-purple-900/40 border border-purple-500/40 text-purple-300 text-xs sm:text-sm font-mono tracking-wide backdrop-blur-md shadow-lg shadow-purple-950/40">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 rounded-full bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 text-xs sm:text-sm font-mono tracking-wide backdrop-blur-md shadow-lg shadow-cyan-950/40">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
           <span>Aspiring Software Developer</span>
         </div>
@@ -421,7 +421,7 @@ const Encryption = () => {
           className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-100 pb-1"
         >
           My Profile{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-amber-300">
             &amp;
           </span>{" "}
           Journey.
@@ -433,30 +433,30 @@ const Encryption = () => {
       </div>
 
       {/* Central Interactive Quantum Particle Morph Display */}
-      <div className="relative w-full max-w-5xl mt-10 rounded-3xl bg-[#090b1c]/80 border border-purple-500/25 p-4 sm:p-7 backdrop-blur-xl shadow-[0_0_60px_rgba(147,51,234,0.18)] flex flex-col items-center overflow-hidden z-10">
+      <div className="relative w-full max-w-5xl mt-10 rounded-3xl bg-[#090b1c]/85 border border-cyan-500/30 p-4 sm:p-7 backdrop-blur-xl shadow-[0_0_60px_rgba(6,182,212,0.2)] flex flex-col items-center overflow-hidden z-10">
         {/* Subtle holographic border flare */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
 
         {/* Top telemetry bar */}
-        <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 text-xs font-mono text-purple-300/80 gap-2">
+        <div className="flex flex-wrap items-center justify-between w-full mb-2 px-2 text-xs font-mono text-cyan-300/80 gap-2">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
             </span>
             <span className="text-gray-300 font-semibold">QUANTUM PARTICLE MORPH</span>
-            <span className="hidden sm:inline text-purple-400/60">•</span>
+            <span className="hidden sm:inline text-cyan-400/60">•</span>
             <span className="hidden sm:inline text-gray-400">1,800 Active Entities</span>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
             <span className="hidden sm:inline">Hover to disperse</span>
-            <span className="hidden sm:inline text-purple-400/60">•</span>
+            <span className="hidden sm:inline text-cyan-400/60">•</span>
             <span>Click for shockwave</span>
           </div>
         </div>
 
         {/* The Quantum Particle Morph Canvas */}
-        <div className="w-full relative rounded-2xl overflow-hidden bg-[#050713] border border-purple-500/20 shadow-inner">
+        <div className="w-full relative rounded-2xl overflow-hidden bg-[#050713] border border-cyan-500/25 shadow-inner">
           <QuantumParticleCanvas
             activeIndex={activeIndex}
             onWordChange={setActiveIndex}
@@ -483,8 +483,8 @@ const Encryption = () => {
                 onClick={() => setActiveIndex(idx)}
                 className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 flex items-center gap-2 cursor-pointer ${
                   isActive
-                    ? "text-white bg-gradient-to-r from-purple-950 via-indigo-950 to-purple-950 border shadow-lg"
-                    : "text-gray-400 hover:text-gray-200 bg-white/5 border border-white/10 hover:border-purple-500/40 hover:bg-white/10"
+                    ? "text-white bg-gradient-to-r from-cyan-950/90 via-slate-900 to-cyan-950/90 border shadow-lg"
+                    : "text-gray-400 hover:text-gray-200 bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-white/10"
                 }`}
                 style={{
                   borderColor: isActive ? w.primary : undefined,
@@ -519,9 +519,9 @@ const Encryption = () => {
         </div>
 
         {/* Simulation Attribution Badge */}
-        <div className="mt-4 pt-4 border-t border-purple-500/15 w-full flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-2 px-2">
+        <div className="mt-4 pt-4 border-t border-cyan-500/20 w-full flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-2 px-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-purple-300 font-semibold">Interactive Canvas:</span>
+            <span className="text-cyan-300 font-semibold">Interactive Canvas:</span>
             <span className="text-cyan-400 font-mono">Real-Time Particle Simulation</span>
             <span className="text-gray-500 hidden sm:inline">(Euler Dynamics)</span>
           </div>

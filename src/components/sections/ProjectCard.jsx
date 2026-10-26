@@ -2,7 +2,7 @@ import React from "react";
 
 const ProjectCard = ({ name, image, description, link }) => {
   return (
-    <div className="w-full sm:w-[360px] bg-[#1a1a2e] border border-[#2e2e48] rounded-xl overflow-hidden shadow-md transition-transform hover:scale-[1.02] hover:shadow-xl opacity-95 hover:opacity-100">
+    <div className="w-full sm:w-[360px] bg-[#090d1f]/90 border border-cyan-500/25 hover:border-cyan-400/50 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl">
       <a href={link} target="_blank" rel="noopener noreferrer">
         <img
           src={image}

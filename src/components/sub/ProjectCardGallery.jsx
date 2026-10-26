@@ -4,7 +4,7 @@ const ProjectCardGallery = ({ name, description, link, tech, image }) => {
   const isGithub = link && link.includes("github.com");
 
   return (
-    <div className="bg-[#1c1c2b] rounded-xl shadow-md overflow-hidden w-[300px] sm:w-[340px] hover:scale-[1.03] transition-transform duration-300 border border-purple-500/20 flex flex-col justify-between">
+    <div className="bg-[#090d1f]/90 rounded-2xl shadow-xl overflow-hidden w-[300px] sm:w-[340px] hover:scale-[1.03] transition-all duration-300 border border-cyan-500/25 hover:border-cyan-400/50 flex flex-col justify-between backdrop-blur-xl">
       <div>
         <img
           src={image}
@@ -20,7 +20,7 @@ const ProjectCardGallery = ({ name, description, link, tech, image }) => {
             {tech?.map((item, i) => (
               <span
                 key={i}
-                className="text-xs bg-purple-800/30 px-2 py-1 rounded-full text-purple-300 border border-purple-500/20"
+                className="text-xs bg-cyan-500/15 px-2.5 py-1 rounded-full text-cyan-300 border border-cyan-500/30 font-mono"
               >
                 {item}
               </span>
@@ -37,8 +37,8 @@ const ProjectCardGallery = ({ name, description, link, tech, image }) => {
             rel="noopener noreferrer"
             className={`inline-block px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               isGithub
-                ? "bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-600/50"
-                : "bg-purple-600 hover:bg-purple-700 text-white"
+                ? "bg-slate-800 hover:bg-slate-700 text-gray-200 border border-cyan-500/30"
+                : "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]"
             }`}
           >
             {isGithub ? "View Code (GitHub)" : "View Live App"}
