@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const titles = [
-  "Student Developer",
-  "C++ Programmer",
-  "Python Enthusiast",
-  "Creative Builder",
+  "C++ Systems Programmer",
+  "Python Algorithm Builder",
   "Curious by Nature",
+  "Creative Problem Solver",
+  "Student Developer & Explorer",
 ];
 
 const RotatingTitles = () => {
@@ -14,13 +15,24 @@ const RotatingTitles = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % titles.length);
-    }, 2500);
+    }, 2800);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="text-xl sm:text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 transition-all duration-500">
-      {titles[index]}
+    <div className="h-8 flex items-center justify-center relative overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
+          className="text-lg sm:text-xl md:text-2xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-center tracking-wide"
+        >
+          {titles[index]}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
