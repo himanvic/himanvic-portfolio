@@ -5,6 +5,10 @@ import { SiHuggingface } from "react-icons/si";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const startYear = 2026;
+  const currentYear = new Date().getFullYear();
+  const yearDisplay = currentYear > startYear ? `${startYear} – ${currentYear}` : `${startYear}`;
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -181,8 +185,8 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar: Copyright & Back to Top */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} Himanvic. Crafted with React &amp; Vite.</p>
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+          <p>© {yearDisplay} • Designed &amp; built by Himanvic</p>
 
           <button
             onClick={scrollToTop}
