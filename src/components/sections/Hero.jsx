@@ -10,7 +10,7 @@ const Hero = () => {
     >
       {/* Background ambient video */}
       <video
-        className="absolute top-[-300px] left-0 w-full h-full object-cover z-[-1] rotate-180 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] [clip-path:inset(5%_0_5%_0)] pointer-events-none opacity-40"
+        className="absolute top-[-300px] left-0 w-full h-full object-cover z-[-1] rotate-180 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] [clip-path:inset(5%_0_5%_0)] pointer-events-none opacity-45"
         autoPlay
         loop
         muted
