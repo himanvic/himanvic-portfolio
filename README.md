@@ -60,12 +60,6 @@ This project can be deployed with Cloudflare Pages using Git integration.
 
 Commit and push your changes to trigger a new deployment when Git integration is configured.
 
-## Credits and License
+## License
 
-This portfolio is customized from the original open-source portfolio project:
-
-https://github.com/McKlay/portfolio-website
-
-The original project's license and copyright notices are retained in the `LICENSE` file. Please consult that file for the applicable license terms.
-
-My personal project links, profile information, and customizations are maintained separately from the original project attribution.
+MIT License — feel free to use this project for your own developer portfolio.
