@@ -69,8 +69,8 @@ const OrbitIcons = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [dimensions, setDimensions] = useState({
-    rx: 185,
-    ry: 88,
+    rx: 175,
+    ry: 78,
   });
 
   const planetRefs = useRef([]);
@@ -83,8 +83,8 @@ const OrbitIcons = () => {
     const updateDimensions = () => {
       const isMobile = window.innerWidth < 640;
       setDimensions({
-        rx: isMobile ? 135 : 185,
-        ry: isMobile ? 65 : 88,
+        rx: isMobile ? 125 : 175,
+        ry: isMobile ? 56 : 78,
       });
     };
 
@@ -172,7 +172,7 @@ const OrbitIcons = () => {
 
   return (
     <div
-      className="relative w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] flex items-center justify-center select-none"
+      className="relative w-[310px] h-[250px] sm:w-[410px] sm:h-[280px] flex items-center justify-center select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -219,22 +219,22 @@ const OrbitIcons = () => {
       {/* 2. Central "H" Singularity Core (z-20) - Elevated Highest Level (No text labels) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-auto group">
         {/* Deep Volumetric Atmospheric Corona Glow */}
-        <div className="absolute w-52 h-52 sm:w-64 sm:h-64 rounded-full bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/20 blur-3xl animate-pulse pointer-events-none" />
+        <div className="absolute w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/20 blur-3xl animate-pulse pointer-events-none" />
 
         {/* Outer Orbiting Compass Radar Rings */}
-        <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-amber-400/30 border-dashed animate-spin-slow pointer-events-none" />
+        <div className="absolute w-32 h-32 sm:w-38 sm:h-38 rounded-full border border-amber-400/30 border-dashed animate-spin-slow pointer-events-none" />
         <div
-          className="absolute w-32 h-32 sm:w-36 sm:h-36 rounded-full border border-cyan-400/25 pointer-events-none"
+          className="absolute w-26 h-26 sm:w-32 sm:h-32 rounded-full border border-cyan-400/25 pointer-events-none"
           style={{ animation: "spin 16s linear infinite reverse" }}
         />
 
         {/* Master Core Orb (Deep Obsidian Cosmic Glass with Inset Bloom) */}
-        <div className="w-22 h-22 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-[#0c1427]/95 via-[#080d1a]/98 to-[#02050e]/95 border-2 border-cyan-400/50 shadow-[0_0_45px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#0c1427]/95 via-[#080d1a]/98 to-[#02050e]/95 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30">
           {/* Inner Glowing Reticle */}
           <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none" />
 
           {/* Pure Laser-Cut Metallic "H" Monogram (Clean, Bold, Zero Text Labels) */}
-          <span className="text-4xl sm:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none">
+          <span className="text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none">
             H
           </span>
         </div>
@@ -256,7 +256,7 @@ const OrbitIcons = () => {
             <div className="relative group flex flex-col items-center">
               {/* Planetary Orbital Capsule */}
               <div
-                className={`w-13 h-13 sm:w-15 sm:h-15 p-3 rounded-2xl flex items-center justify-center bg-[#090d1f]/90 backdrop-blur-xl border ${planet.border} shadow-xl transition-all duration-300 group-hover:scale-115 group-hover:bg-[#0c142b]`}
+                className={`w-12 h-12 sm:w-14 sm:h-14 p-2.5 rounded-2xl flex items-center justify-center bg-[#090d1f]/90 backdrop-blur-xl border ${planet.border} shadow-xl transition-all duration-300 group-hover:scale-115 group-hover:bg-[#0c142b]`}
                 style={{
                   boxShadow: isHovered
                     ? `0 0 28px ${planet.glow}, inset 0 0 12px ${planet.glow}`

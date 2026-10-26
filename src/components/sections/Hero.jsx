@@ -6,11 +6,11 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
+      className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-20 sm:pb-24"
     >
       {/* Background ambient video - Upside Down Top Canopy (Seamless Radial Edge Blending) */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[108%] h-[380px] sm:h-[460px] overflow-hidden pointer-events-none z-0"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[108%] h-[320px] sm:h-[380px] overflow-hidden pointer-events-none z-0"
         style={{
           perspective: "1000px",
           maskImage: "radial-gradient(ellipse 80% 85% at 50% 0%, black 40%, transparent 95%)",
@@ -33,7 +33,7 @@ const Hero = () => {
       </div>
 
       {/* Hero content container */}
-      <div className="relative z-10 max-w-7xl w-full flex flex-col lg:flex-row items-center justify-between gap-12 sm:gap-16 lg:gap-8">
+      <div className="relative z-10 max-w-7xl w-full flex flex-col lg:flex-row items-center justify-between gap-10 sm:gap-14 lg:gap-8 my-auto">
         {/* LEFT: TEXT & CALL TO ACTIONS */}
         <div className="flex-1 text-center lg:text-left px-2 max-w-2xl lg:max-w-none">
           {/* Beacon Status Badge */}
@@ -81,13 +81,13 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* RIGHT: "H" Sun Solar System + Rotating Titles (Adjusted down for breathing room) */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-2 w-full pt-6 sm:pt-8 lg:pt-12">
+        {/* RIGHT: "H" Sun Solar System + Rotating Titles (Balanced & Symmetrical) */}
+        <div className="flex-1 flex flex-col items-center justify-center relative px-2 w-full my-auto">
           <OrbitIcons />
 
           {/* Dynamic Titles beneath the Solar System */}
-          <div className="mt-8 sm:mt-12 text-center">
-            <div className="text-[11px] uppercase tracking-widest text-cyan-400/80 font-mono mb-2 font-semibold">
+          <div className="mt-4 sm:mt-5 text-center">
+            <div className="text-[11px] uppercase tracking-widest text-cyan-400/80 font-mono mb-1.5 font-semibold">
               Focus &amp; Craft
             </div>
             <RotatingTitles />
