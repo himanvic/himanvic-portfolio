@@ -13,6 +13,7 @@ import {
 
 const Projects = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(
@@ -32,10 +33,12 @@ const Projects = () => {
   const isTablet = viewportWidth >= 640 && viewportWidth < 1024;
 
   const nextProject = useCallback(() => {
+    setDirection(1);
     setActiveIndex((prev) => (prev + 1) % total);
   }, [total]);
 
   const prevProject = useCallback(() => {
+    setDirection(-1);
     setActiveIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
 
@@ -79,12 +82,12 @@ const Projects = () => {
     if (diff === 2) diff = -1;
     if (diff === -2) diff = 1;
 
-    // Center active card
+    // Center active card (front of stage)
     if (diff === 0) {
       return {
         x: 0,
         y: 0,
-        z: 80,
+        z: 90,
         scale: isMobile ? 1.0 : 1.05,
         rotateY: 0,
         opacity: 1,
@@ -99,11 +102,11 @@ const Projects = () => {
       return {
         x: offsetX,
         y: 0,
-        z: -90,
-        scale: isMobile ? 0.78 : 0.86,
-        rotateY: -28,
+        z: -120,
+        scale: isMobile ? 0.78 : 0.85,
+        rotateY: -26,
         opacity: isMobile ? 0.35 : 0.65,
-        zIndex: 15,
+        zIndex: 10,
         isCenter: false,
       };
     }
@@ -113,11 +116,11 @@ const Projects = () => {
     return {
       x: offsetX,
       y: 0,
-      z: -90,
-      scale: isMobile ? 0.78 : 0.86,
-      rotateY: 28,
+      z: -120,
+      scale: isMobile ? 0.78 : 0.85,
+      rotateY: 26,
       opacity: isMobile ? 0.35 : 0.65,
-      zIndex: 15,
+      zIndex: 10,
       isCenter: false,
     };
   };
@@ -126,6 +129,10 @@ const Projects = () => {
     if (index === activeIndex) {
       window.open(link, "_blank", "noopener,noreferrer");
     } else {
+      let diff = index - activeIndex;
+      if (diff === 2) diff = -1;
+      if (diff === -2) diff = 1;
+      setDirection(diff > 0 ? 1 : -1);
       setActiveIndex(index);
     }
   };
@@ -192,15 +199,15 @@ const Projects = () => {
                 opacity: transform.opacity,
               }}
               transition={{
-                type: "spring",
-                stiffness: 240,
-                damping: 26,
+                duration: 0.72,
+                ease: [0.16, 1, 0.3, 1],
               }}
               style={{
                 zIndex: transform.zIndex,
                 transformStyle: "preserve-3d",
+                willChange: "transform, opacity",
               }}
-              className={`absolute w-[290px] sm:w-[350px] md:w-[380px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
+              className={`absolute w-[290px] sm:w-[350px] md:w-[380px] rounded-2xl overflow-hidden cursor-pointer ${
                 isCenter
                   ? "bg-[#111328]/95 border-2 border-purple-500/70 shadow-[0_0_45px_rgba(168,85,247,0.35)] ring-1 ring-cyan-400/30"
                   : "bg-[#0c0d1e]/85 border border-purple-500/20 shadow-xl hover:border-purple-500/50 hover:opacity-85"
@@ -310,7 +317,13 @@ const Projects = () => {
             return (
               <button
                 key={project.id}
-                onClick={() => setActiveIndex(idx)}
+                onClick={() => {
+                  let diff = idx - activeIndex;
+                  if (diff === 2) diff = -1;
+                  if (diff === -2) diff = 1;
+                  setDirection(diff > 0 ? 1 : -1);
+                  setActiveIndex(idx);
+                }}
                 aria-label={`Jump to ${project.name}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer flex items-center gap-1.5 ${
                   isActive
