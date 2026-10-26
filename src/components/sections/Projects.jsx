@@ -98,7 +98,7 @@ const Projects = () => {
 
     // Right card in orbit
     if (diff === 1) {
-      const offsetX = isMobile ? 135 : isTablet ? 240 : 330;
+      const offsetX = isMobile ? 135 : isTablet ? 280 : 400;
       return {
         x: offsetX,
         y: 0,
@@ -112,7 +112,7 @@ const Projects = () => {
     }
 
     // Left card in orbit (diff === -1)
-    const offsetX = isMobile ? -135 : isTablet ? -240 : -330;
+    const offsetX = isMobile ? -135 : isTablet ? -280 : -400;
     return {
       x: offsetX,
       y: 0,
@@ -147,15 +147,15 @@ const Projects = () => {
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
       {/* Header with badge */}
-      <div className="text-center mb-8 px-4">
+      <div className="flex flex-col items-center text-center mb-8 px-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-3 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-medium tracking-wide backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
           <span>FEATURED CREATIONS</span>
         </div>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-transparent bg-clip-text tracking-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-transparent bg-clip-text pb-2 tracking-normal inline-block">
           My Projects
         </h2>
-        <p className="text-gray-400 text-xs sm:text-sm mt-2 max-w-md mx-auto">
+        <p className="text-gray-400 text-xs sm:text-sm mt-1 max-w-md mx-auto">
           Revolving 3D orbit • Click cards to focus or launch
         </p>
       </div>

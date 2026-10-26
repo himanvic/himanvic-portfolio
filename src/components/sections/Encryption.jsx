@@ -418,7 +418,7 @@ const Encryption = () => {
           variants={slideInFromTop}
           initial="hidden"
           animate="visible"
-          className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-100 tracking-tight"
+          className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-100 pb-1"
         >
           My Profile{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400">
@@ -427,8 +427,8 @@ const Encryption = () => {
           Journey.
         </motion.h2>
 
-        <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-3 max-w-xl">
-          A little about the person behind the projects.
+        <p className="text-gray-300 text-sm sm:text-base md:text-lg mt-3 max-w-xl leading-relaxed">
+          Building foundations today for a craft that will span decades.
         </p>
       </div>
 

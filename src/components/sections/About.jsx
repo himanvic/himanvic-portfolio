@@ -12,7 +12,7 @@ const About = () => {
           <div className="inline-block px-4 py-1.5 mb-3 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-medium tracking-wide">
             GET TO KNOW ME
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-transparent bg-clip-text">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 text-transparent bg-clip-text pb-2 inline-block">
             About Me
           </h2>
         </div>
