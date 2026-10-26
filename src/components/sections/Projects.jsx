@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PROJECTS } from "@/constants/projectsData";
+import { fetchGitHubRepos, formatRepoForCard } from "@/utils/githubSync";
 import { Link } from "react-router-dom";
 import {
   FaChevronLeft,
@@ -12,6 +13,7 @@ import {
 } from "react-icons/fa";
 
 const Projects = () => {
+  const [projectList, setProjectList] = useState(PROJECTS);
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
@@ -20,13 +22,56 @@ const Projects = () => {
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
   const touchStartXRef = useRef(0);
-  const total = PROJECTS.length;
+  const total = projectList.length;
 
   // Responsive width tracking
   useEffect(() => {
     const handleResize = () => setViewportWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Automatic sync with newly tagged "featured" GitHub repos
+  useEffect(() => {
+    let isMounted = true;
+    async function syncFeatured() {
+      const repos = await fetchGitHubRepos();
+      if (!repos || !Array.isArray(repos) || !isMounted) return;
+
+      const baselineNames = new Set(
+        PROJECTS.map((p) => p.name.toLowerCase().replace(/\s+/g, "-"))
+      );
+
+      const newFeatured = [];
+      for (const repo of repos) {
+        const cleanName = repo.name.toLowerCase().replace(/\s+/g, "-");
+        if (
+          (repo.topics || []).includes("featured") &&
+          !baselineNames.has(cleanName)
+        ) {
+          const formatted = formatRepoForCard(repo);
+          newFeatured.push({
+            id: formatted.id,
+            name: formatted.name,
+            image: formatted.image,
+            tag: formatted.tag,
+            tech: formatted.tech,
+            accent: formatted.accent,
+            description: formatted.description,
+            link: formatted.link,
+          });
+        }
+      }
+
+      if (newFeatured.length > 0 && isMounted) {
+        setProjectList([...PROJECTS, ...newFeatured]);
+      }
+    }
+
+    syncFeatured();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const isMobile = viewportWidth < 640;
@@ -174,8 +219,8 @@ const Projects = () => {
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_12px_#facc15]" />
         </div>
 
-        {/* The 3 Revolving Project Cards */}
-        {PROJECTS.map((project, idx) => {
+        {/* The Revolving Project Cards (Baseline + Auto-Synced Featured) */}
+        {projectList.map((project, idx) => {
           const transform = getCardTransform(idx);
           const isCenter = transform.isCenter;
 
@@ -211,6 +256,9 @@ const Projects = () => {
                 <img
                   src={project.image}
                   alt={project.name}
+                  onError={(e) => {
+                    e.currentTarget.src = `https://opengraph.githubassets.com/1/himanvic/${project.name.toLowerCase().replace(/\s+/g, "-")}`;
+                  }}
                   className={`w-full h-full object-cover object-top transition-transform duration-500 ${
                     isCenter ? "hover:scale-105" : ""
                   }`}
@@ -305,7 +353,7 @@ const Projects = () => {
       {/* Orbital Pagination Dots & Auto-Play Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 z-20">
         <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#090d1f]/80 border border-cyan-500/25 backdrop-blur-md shadow-md">
-          {PROJECTS.map((project, idx) => {
+          {projectList.map((project, idx) => {
             const isActive = activeIndex === idx;
             return (
               <button

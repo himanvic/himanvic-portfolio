@@ -1,11 +1,63 @@
 // File Name: ProjectGallery.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PROJECT_GALLERY } from "@/constants/projectGalleryData";
 import ProjectGalleryCard from "../sub/ProjectGalleryCard";
+import { fetchGitHubRepos, formatRepoForCard } from "@/utils/githubSync";
 import { Link } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaGithub } from "react-icons/fa";
 
 const ProjectGallery = () => {
+  const [galleryData, setGalleryData] = useState(PROJECT_GALLERY);
+  const [isLiveSynced, setIsLiveSynced] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncRepos() {
+      const repos = await fetchGitHubRepos();
+      if (!repos || !Array.isArray(repos) || !isMounted) return;
+
+      // Extract existing repo names from baseline to prevent duplicates
+      const baselineExperiments = PROJECT_GALLERY["Open Source & Systems Experiments"] || [];
+      const existingNames = new Set(
+        baselineExperiments.map((p) => p.name.toLowerCase().replace(".sys", ""))
+      );
+
+      // Known featured web apps to avoid duplicate listing in experiments
+      const featuredNames = new Set(
+        (PROJECT_GALLERY["Featured Web Applications"] || []).map((p) =>
+          p.name.toLowerCase().replace(/\s+/g, "-")
+        )
+      );
+
+      // Find any newly published repositories on GitHub
+      const newExperiments = [];
+      for (const repo of repos) {
+        const cleanName = repo.name.toLowerCase().replace(".sys", "");
+        if (!existingNames.has(cleanName) && !featuredNames.has(cleanName)) {
+          newExperiments.push(formatRepoForCard(repo));
+        }
+      }
+
+      if (newExperiments.length > 0 && isMounted) {
+        setGalleryData({
+          ...PROJECT_GALLERY,
+          "Open Source & Systems Experiments": [
+            ...baselineExperiments,
+            ...newExperiments,
+          ],
+        });
+        setIsLiveSynced(true);
+      }
+    }
+
+    syncRepos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section
       id="project-gallery"
@@ -21,9 +73,18 @@ const ProjectGallery = () => {
           <span>Back to Portfolio</span>
         </Link>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span>All Creations &amp; Experiments</span>
+        <div className="flex items-center gap-2">
+          {isLiveSynced && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live Synced</span>
+            </div>
+          )}
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span>All Creations &amp; Experiments</span>
+          </div>
         </div>
       </div>
 
@@ -39,7 +100,7 @@ const ProjectGallery = () => {
 
       {/* Gallery Sections */}
       <div className="max-w-6xl mx-auto space-y-20">
-        {Object.entries(PROJECT_GALLERY).map(([category, data]) => (
+        {Object.entries(galleryData).map(([category, data]) => (
           <div key={category} className="space-y-8">
             <div className="flex items-center gap-4">
               <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide">
