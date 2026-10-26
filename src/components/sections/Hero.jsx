@@ -81,8 +81,8 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* RIGHT: "H" Sun Solar System + Rotating Titles */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-2 w-full">
+        {/* RIGHT: "H" Sun Solar System + Rotating Titles (Adjusted down for breathing room) */}
+        <div className="flex-1 flex flex-col items-center justify-center relative px-2 w-full pt-6 sm:pt-8 lg:pt-12">
           <OrbitIcons />
 
           {/* Dynamic Titles beneath the Solar System */}
