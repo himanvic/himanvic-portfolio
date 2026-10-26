@@ -93,14 +93,23 @@ const Skills = () => {
         </div>
       </div>
 
-      {/* Cybernetic Background Video */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      {/* Cybernetic Background Wormhole Video (Recolored from Purple to Electric Cyan/Blue) */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden"
+        style={{
+          maskImage: "radial-gradient(ellipse 75% 70% at 50% 50%, black 25%, transparent 85%)",
+          WebkitMaskImage: "radial-gradient(ellipse 75% 70% at 50% 50%, black 25%, transparent 85%)",
+        }}
+      >
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover opacity-25"
+          className="w-full h-full object-cover opacity-45"
+          style={{
+            filter: "hue-rotate(285deg) saturate(1.35) brightness(1.15)",
+          }}
         >
           <source src="/assets/videos/skills.webm" type="video/webm" />
         </video>
