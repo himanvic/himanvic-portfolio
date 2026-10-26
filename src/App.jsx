@@ -6,7 +6,7 @@ import Hero from './components/sections/Hero';
 import About from './components/sections/About';
 import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
-import Encryption from './components/sections/Encryption';
+import Profile from './components/sections/Profile';
 import Footer from './components/layout/Footer';
 
 const App = () => {
@@ -30,7 +30,7 @@ const App = () => {
       <About />
       <Skills />
       <Projects />
-      <Encryption />
+      <Profile />
       <Footer />
     </div>
   );

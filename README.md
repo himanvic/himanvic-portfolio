@@ -1,21 +1,25 @@
 <div align="center">
 
+<img src="./public/favicon.svg" alt="Himanvic Logo" width="88" height="88" />
+
 # 🌌 Himanvic — Developer Portfolio
 
-**Student developer exploring systems, algorithms, and real-time interactive simulations with C++ & Python.**
+**Crafting low-level systems in C++ and algorithmic logic in Python.**
 
-[![Website](https://img.shields.io/badge/Live_Portfolio-Cloudflare_Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://github.com/himanvic/himanvic-portfolio)
-[![C++](https://img.shields.io/badge/C++-Systems_&_Performance-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)](https://github.com/himanvic/bottelneck.sys)
-[![Python](https://img.shields.io/badge/Python-Algorithms_&_Logic-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://github.com/himanvic/sanskode)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](./LICENSE)
+[![Live Portfolio](https://img.shields.io/badge/Live_Portfolio-himanvic.pages.dev-00f0ff?style=for-the-badge&logo=cloudflarepages&logoColor=black)](https://himanvic.pages.dev)
+[![C++](https://img.shields.io/badge/C++-Systems_&_Algorithms-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)](https://github.com/himanvic/bottelneck.sys)
+[![Python](https://img.shields.io/badge/Python-Logic_&_Math-facc15?style=for-the-badge&logo=python&logoColor=black)](https://github.com/himanvic/sanskode)
+[![License: MIT](https://img.shields.io/badge/License-MIT-38bdf8.svg?style=for-the-badge)](./LICENSE)
 
 ---
 
 </div>
 
-## 📖 About Me
+## 👨‍💻 About Himanvic
 
-I am a student developer passionate about understanding how software works from the hardware up to interactive experiences. My current learning journey is strictly dedicated to mastering **C++** (low-level mechanics, memory, data structures, and systems architecture) and **Python** (algorithmic problem solving, automation, and rapid prototyping).
+I am a student software developer dedicated to understanding computer systems from first principles. My craft is strictly focused on two core languages:
+- **C++**: Low-level memory architecture, data structures, algorithm optimization, and hardware interaction.
+- **Python**: Algorithmic experimentation, simulation mathematics, automation, and developer tooling.
 
 > *"Building foundations today for a craft that will span decades."*
 
@@ -31,43 +35,63 @@ I am a student developer passionate about understanding how software works from 
 
 ---
 
-## 🔬 Open Source & Systems Experiments
+## 🔬 Systems & Algorithmic Experiments
 
-* **[`bottelneck.sys`](https://github.com/himanvic/bottelneck.sys)** — C++ systems and performance experiments exploring low-level mechanics, memory efficiency, and architecture fundamentals.
+* **[`bottelneck.sys`](https://github.com/himanvic/bottelneck.sys)** — C++ systems and performance experimentation exploring low-level mechanics, memory efficiency, and architecture fundamentals.
 * **[`sanskode`](https://github.com/himanvic/sanskode)** — Python developer explorations, algorithmic challenges, and scripting logic.
 
 ---
 
-## ✨ Portfolio Key Features & Engineering
+## ✨ Engineering & Visual Architecture
 
-* **Quantum Particle Morph Engine ([`Encryption.jsx`](./src/components/sections/Encryption.jsx)):**
-  * Real-time HTML5 Canvas simulation with **1,800+ active particles**.
+* **Ceiling Void Canopy:**
+  * 1080p cosmic loop oriented as an overhead celestial canopy with 3D perspective tilt and radial edge feathering.
+* **Bespoke Solar System Core ([`SolarSystem.jsx`](./src/components/sub/SolarSystem.jsx)):**
+  * Laser-cut metallic **"H"** monogram set inside deep obsidian cosmic glass with concentric radar compass rings.
+  * 6 orbiting planetary capsules (`C++`, `Python`, `Linux`, `Git`, `VS Code`, `GitHub`) moving on a tilted mathematical ellipse with 60–120fps direct DOM billboarding.
+* **Quantum Particle Morph Engine ([`Profile.jsx`](./src/components/sections/Profile.jsx)):**
+  * Real-time HTML5 Canvas simulation with **1,800+ active entities**.
   * Damped Euler spring acceleration ($a = (target - pos) \times 0.055, v = v \times 0.84$).
-  * Dynamic sub-pixel glyph sampling across custom keyword themes (`Himanvic`, `C++`, `Python`, `Dynamics`, `Curiosity`).
-  * Zero-point quantum micro-vibration & interactive radial shockwave physics on click/drag.
-* **3D Revolving Orbital Carousel ([`Projects.jsx`](./src/components/sections/Projects.jsx)):**
-  * True 3D planetary perspective ($Z$-depth layering) with silky Apple-grade cubic-bezier curves (`[0.16, 1, 0.3, 1]`).
-  * 3D elliptical celestial orbit track, mobile swipe gestures, and hover-paused auto-rotation.
-* **Modern Frosted Glass Dock ([`Navbar.jsx`](./src/components/layout/Navbar.jsx)):**
-  * Centered macOS-inspired dock with backdrop blur, scroll awareness, and compact single-row mobile layout.
-* **High-Tech Cosmic Footer ([`Footer.jsx`](./src/components/layout/Footer.jsx)):**
-  * Automated lifetime year tracking (`© 2026 – {currentYear}`), categorized navigation, and smooth Back-to-Top scrolling.
+  * Dynamic sub-pixel glyph sampling across keyword themes (`Himanvic`, `C++`, `Python`, `Dynamics`, `Curiosity`).
+  * Zero-point quantum micro-vibration and interactive radial shockwave physics.
+* **3D Planetary Carousel ([`Projects.jsx`](./src/components/sections/Projects.jsx)):**
+  * True 3D perspective with silky Apple-grade cubic-bezier curves (`[0.16, 1, 0.3, 1]`).
+  * Elliptical orbital track with mobile swipe gestures and hover-paused auto-rotation.
+* **Cyber-Cosmic Palette:**
+  * Electric Cyan (`#00f0ff` / `#38bdf8`) & Solar Amber (`#facc15` / `#fbbf24`) over deep obsidian cosmic glass.
 
 ---
 
-## 🛠️ Tech Stack & Tools
+## 📁 Clean Repository Structure
 
-* **Core Focus Languages:** C++, Python
-* **Frontend UI & 3D:** React 19, Three.js, Framer Motion, Tailwind CSS
-* **Build Tool & Bundler:** Vite
-* **Hosting & CDN:** Cloudflare Pages
-* **Environment:** Linux, Git, GitHub, VS Code
+```
+himanvic-portfolio/
+├── public/
+│   ├── favicon.svg               # Custom animated Cyan-Amber "H" Favicon & Logo
+│   ├── _redirects                # Cloudflare Pages SPA Routing
+│   └── assets/
+│       ├── images/
+│       │   └── projects/         # High-res screenshots (Mausam India, NaradNow, Rail & Route, bottelneck, sanskode)
+│       └── videos/
+│           ├── hero.mp4          # Celestial canopy loop
+│           └── skills.webm       # Recycled & recolored cyan wormhole loop
+├── src/
+│   ├── components/
+│   │   ├── layout/               # Navbar.jsx, Footer.jsx
+│   │   ├── sections/             # Hero.jsx, About.jsx, Skills.jsx, Projects.jsx, Profile.jsx, ProjectGallery.jsx
+│   │   ├── sub/                  # SolarSystem.jsx, RotatingTitles.jsx, ProjectGalleryCard.jsx
+│   │   └── GlobalStarfield.jsx   # 3D interactive starfield
+│   ├── constants/                # projectsData.js, projectGalleryData.js
+│   ├── pages/                    # Projects.jsx (Full Project Archive Page)
+│   └── utils/                    # motion.js
+├── index.html                    # Meta tags, OpenGraph, Twitter Cards
+├── package.json
+└── vite.config.js
+```
 
 ---
 
-## 💻 Local Development Setup
-
-Clone the repository and run the development server locally:
+## 🛠️ Local Development & Deployment
 
 ```bash
 # Clone the repository
@@ -79,28 +103,18 @@ cd himanvic-portfolio
 # Install dependencies
 npm install
 
-# Start Vite dev server
+# Start local development server
 npm run dev
-```
 
-### Production Build
-
-```bash
+# Build for production
 npm run build
 ```
 
-The production output is generated in the `dist/` directory, ready for Cloudflare Pages or any static edge CDN.
-
 ---
 
-## 📬 Connect With Me
+<div align="center">
 
-* **GitHub:** [@himanvic](https://github.com/himanvic)
-* **Twitter / X:** [@Himanvic_dev](https://x.com/Himanvic_dev)
-* **Hugging Face:** [@himanvic](https://huggingface.co/himanvic)
+Crafted with ⚡ and passion by **[Himanvic](https://github.com/himanvic)**.  
+Deployed globally on **[Cloudflare Pages](https://himanvic.pages.dev)**.
 
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](./LICENSE) — created by [Himanvic](https://github.com/himanvic).
+</div>

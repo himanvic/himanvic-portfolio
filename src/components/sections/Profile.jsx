@@ -1,4 +1,4 @@
-// File Name: Encryption.jsx
+// File Name: Profile.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { slideInFromTop } from "../../utils/motion";
@@ -390,7 +390,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
   );
 };
 
-const Encryption = () => {
+const Profile = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const activeWord = WORDS[activeIndex] || WORDS[0];
@@ -534,4 +534,4 @@ const Encryption = () => {
   );
 };
 
-export default Encryption;
+export default Profile;

@@ -65,7 +65,7 @@ const PLANETS = [
   },
 ];
 
-const OrbitIcons = () => {
+const SolarSystem = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [dimensions, setDimensions] = useState({
@@ -301,4 +301,4 @@ const OrbitIcons = () => {
   );
 };
 
-export default OrbitIcons;
+export default SolarSystem;

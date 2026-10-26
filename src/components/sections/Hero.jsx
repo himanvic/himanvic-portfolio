@@ -1,5 +1,5 @@
 import React from "react";
-import OrbitIcons from "../sub/OrbitIcons";
+import SolarSystem from "../sub/SolarSystem";
 import RotatingTitles from "../sub/RotatingTitles";
 
 const Hero = () => {
@@ -83,7 +83,7 @@ const Hero = () => {
 
         {/* RIGHT: "H" Sun Solar System + Rotating Titles (Balanced & Symmetrical) */}
         <div className="flex-1 flex flex-col items-center justify-center relative px-2 w-full my-auto">
-          <OrbitIcons />
+          <SolarSystem />
 
           {/* Dynamic Titles beneath the Solar System */}
           <div className="mt-4 sm:mt-5 text-center">

@@ -1,7 +1,7 @@
 // File Name: ProjectGallery.jsx
 import React from "react";
-import { PROJECT_GALLERY } from "@/constants/PROJECT_GALLERY_DATA";
-import ProjectCardGallery from "../sub/ProjectCardGallery";
+import { PROJECT_GALLERY } from "@/constants/projectGalleryData";
+import ProjectGalleryCard from "../sub/ProjectGalleryCard";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 
@@ -50,7 +50,7 @@ const ProjectGallery = () => {
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-8">
               {data.map((project) => (
-                <ProjectCardGallery key={project.id} {...project} />
+                <ProjectGalleryCard key={project.id} {...project} />
               ))}
             </div>
           </div>

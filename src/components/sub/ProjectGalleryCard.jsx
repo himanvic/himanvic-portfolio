@@ -1,6 +1,6 @@
 import React from "react";
 
-const ProjectCardGallery = ({ name, description, link, tech, image }) => {
+const ProjectGalleryCard = ({ name, description, link, tech, image }) => {
   const isGithub = link && link.includes("github.com");
 
   return (
@@ -49,4 +49,4 @@ const ProjectCardGallery = ({ name, description, link, tech, image }) => {
   );
 };
 
-export default ProjectCardGallery;
+export default ProjectGalleryCard;

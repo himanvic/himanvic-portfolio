@@ -1,7 +1,7 @@
 // File Name: Projects.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PROJECTS } from "@/constants/PROJECT_DATA";
+import { PROJECTS } from "@/constants/projectsData";
 import { Link } from "react-router-dom";
 import {
   FaChevronLeft,
