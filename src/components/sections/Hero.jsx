@@ -8,19 +8,19 @@ const Hero = () => {
       id="hero"
       className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
     >
-      {/* Background ambient video - Upside Down Top Canopy (Full 100% Quality, Above Stars) */}
+      {/* Background ambient video - Upside Down Top Canopy (Seamless Radial Edge Blending) */}
       <div
-        className="absolute top-0 left-0 w-full h-[360px] sm:h-[440px] overflow-hidden pointer-events-none z-0"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[108%] h-[380px] sm:h-[460px] overflow-hidden pointer-events-none z-0"
         style={{
           perspective: "1000px",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+          maskImage: "radial-gradient(ellipse 80% 85% at 50% 0%, black 40%, transparent 95%)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 85% at 50% 0%, black 40%, transparent 95%)",
         }}
       >
         <video
           className="w-full h-full object-cover"
           style={{
-            transform: "rotate(180deg) rotateX(12deg)",
+            transform: "rotate(180deg) rotateX(10deg) scale(1.06)",
             transformOrigin: "center center",
           }}
           autoPlay
