@@ -29,10 +29,10 @@ const WORDS = [
     glow: "rgba(250, 204, 21, 0.45)",
   },
   {
-    name: "Quantum",
-    subtitle: "Simulation Physics",
-    description: "Inspired by Quantum-Gravity-Shift: exploring n-body dynamics, forces, and particle systems.",
-    colors: ["#ec4899", "#c084fc", "#a855f7", "#f43f5e", "#ffffff"],
+    name: "Dynamics",
+    subtitle: "Computational Physics & Motion",
+    description: "Where algorithms, system mechanics, and real-time interactive simulation meet.",
+    colors: ["#ec4899", "#c084fc", "#a855f7", "#38bdf8", "#ffffff"],
     primary: "#ec4899",
     glow: "rgba(236, 72, 153, 0.45)",
   },
@@ -80,7 +80,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
     let fontSize = Math.min(130, Math.floor(width / (charCount * 0.58)));
     if (text === "C++") fontSize = Math.min(160, Math.floor(width * 0.36));
     if (text === "Python") fontSize = Math.min(135, Math.floor(width * 0.28));
-    if (text === "Quantum") fontSize = Math.min(125, Math.floor(width * 0.22));
+    if (text === "Dynamics") fontSize = Math.min(120, Math.floor(width * 0.19));
     if (text === "Curiosity") fontSize = Math.min(110, Math.floor(width * 0.17));
     if (fontSize < 36) fontSize = 36;
 
@@ -521,16 +521,9 @@ const Encryption = () => {
         {/* Simulation Attribution Badge */}
         <div className="mt-4 pt-4 border-t border-purple-500/15 w-full flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-2 px-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-purple-300 font-semibold">Inspired by:</span>
-            <a
-              href="https://github.com/himanvic/Quantum-Gravity-Shift"
-              target="_blank"
-              rel="noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 font-mono underline underline-offset-2 transition-colors"
-            >
-              Quantum-Gravity-Shift
-            </a>
-            <span className="text-gray-500 hidden sm:inline">(Simulation Physics)</span>
+            <span className="text-purple-300 font-semibold">Interactive Canvas:</span>
+            <span className="text-cyan-400 font-mono">Real-Time Particle Simulation</span>
+            <span className="text-gray-500 hidden sm:inline">(Euler Dynamics)</span>
           </div>
           <div className="text-gray-500 font-mono text-[11px]">
             Damped Euler Springs • Zero-Point Vibration • Shockwave Dynamics
