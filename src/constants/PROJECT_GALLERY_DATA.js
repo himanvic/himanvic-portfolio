@@ -25,30 +25,22 @@ export const PROJECT_GALLERY = {
       image: "/assets/images/project-3.png",
     },
   ],
-  "Open Source & Experiments": [
+  "Open Source & Systems Experiments": [
     {
       id: "exp-1",
       name: "bottelneck.sys",
-      description: "Systems and performance experimentation repository exploring low-level concepts and optimization.",
-      tech: ["C++", "System Architecture", "Performance"],
+      description: "Systems and performance experimentation repository exploring low-level concepts, memory layout, and architecture fundamentals in C++.",
+      tech: ["C++", "System Architecture", "Performance", "Low-Level"],
       link: "https://github.com/himanvic/bottelneck.sys",
       image: "/assets/images/project-gallery/himanvic/bottelneck.png",
     },
     {
       id: "exp-2",
       name: "sanskode",
-      description: "Creative coding and developer exploration project.",
-      tech: ["Python", "Algorithms", "Development"],
+      description: "Algorithmic explorations, scripting logic, and experimental development in Python.",
+      tech: ["Python", "Algorithms", "Automation", "Logic"],
       link: "https://github.com/himanvic/sanskode",
       image: "/assets/images/project-gallery/himanvic/sanskode.png",
-    },
-    {
-      id: "exp-3",
-      name: "Quantum-Gravity-Shift",
-      description: "Interactive visual experiment and computational simulation exploring physics-inspired interactions.",
-      tech: ["Physics Simulation", "Computational Modeling"],
-      link: "https://github.com/himanvic/Quantum-Gravity-Shift",
-      image: "/assets/images/project-gallery/himanvic/quantum.png",
     },
   ],
 };
