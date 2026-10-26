@@ -39,15 +39,17 @@ const Projects = () => {
       if (!repos || !Array.isArray(repos) || !isMounted) return;
 
       const baselineNames = new Set(
-        PROJECTS.map((p) => p.name.toLowerCase().replace(/\s+/g, "-"))
+        PROJECTS.map((p) => p.name.toLowerCase().replace(/[^a-z0-9]/g, ""))
       );
 
       const newFeatured = [];
       for (const repo of repos) {
-        const cleanName = repo.name.toLowerCase().replace(/\s+/g, "-");
+        const cleanName = repo.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const cleanNoWebsite = cleanName.replace(/website$/, "");
         if (
           (repo.topics || []).includes("featured") &&
-          !baselineNames.has(cleanName)
+          !baselineNames.has(cleanName) &&
+          !baselineNames.has(cleanNoWebsite)
         ) {
           const formatted = formatRepoForCard(repo);
           newFeatured.push({

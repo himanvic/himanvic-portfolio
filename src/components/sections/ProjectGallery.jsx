@@ -17,26 +17,49 @@ const ProjectGallery = () => {
       const repos = await fetchGitHubRepos();
       if (!repos || !Array.isArray(repos) || !isMounted) return;
 
-      // Extract existing repo names from baseline to prevent duplicates
+      // Build a comprehensive set of known baseline identifiers (names, slugs, links)
+      const existingIdentifiers = new Set();
+      Object.values(PROJECT_GALLERY).flat().forEach((project) => {
+        const cleanProjectName = project.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        existingIdentifiers.add(cleanProjectName);
+        existingIdentifiers.add(cleanProjectName.replace(/website$/, ""));
+        existingIdentifiers.add(cleanProjectName.replace(/sys$/, ""));
+
+        if (project.link) {
+          const urlMatch = project.link.toLowerCase().match(/(?:https?:\/\/)?([^\.\/]+)/);
+          if (urlMatch && urlMatch[1]) {
+            const domainSlug = urlMatch[1].replace(/[^a-z0-9]/g, "");
+            existingIdentifiers.add(domainSlug);
+            existingIdentifiers.add(domainSlug.replace(/website$/, ""));
+          }
+          const ghMatch = project.link.toLowerCase().match(/github\.com\/[^\/]+\/([^\/?#]+)/);
+          if (ghMatch && ghMatch[1]) {
+            const repoSlug = ghMatch[1].replace(/[^a-z0-9]/g, "");
+            existingIdentifiers.add(repoSlug);
+            existingIdentifiers.add(repoSlug.replace(/website$/, ""));
+            existingIdentifiers.add(repoSlug.replace(/sys$/, ""));
+          }
+        }
+      });
+
       const baselineExperiments = PROJECT_GALLERY["Open Source & Systems Experiments"] || [];
-      const existingNames = new Set(
-        baselineExperiments.map((p) => p.name.toLowerCase().replace(".sys", ""))
-      );
 
-      // Known featured web apps to avoid duplicate listing in experiments
-      const featuredNames = new Set(
-        (PROJECT_GALLERY["Featured Web Applications"] || []).map((p) =>
-          p.name.toLowerCase().replace(/\s+/g, "-")
-        )
-      );
-
-      // Find any newly published repositories on GitHub
+      // Find any newly published repositories on GitHub not already present
       const newExperiments = [];
       for (const repo of repos) {
-        const cleanName = repo.name.toLowerCase().replace(".sys", "");
-        if (!existingNames.has(cleanName) && !featuredNames.has(cleanName)) {
-          newExperiments.push(formatRepoForCard(repo));
+        const repoSlug = repo.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const repoSlugNoWebsite = repoSlug.replace(/website$/, "");
+        const repoSlugNoSys = repoSlug.replace(/sys$/, "");
+
+        if (
+          existingIdentifiers.has(repoSlug) ||
+          existingIdentifiers.has(repoSlugNoWebsite) ||
+          existingIdentifiers.has(repoSlugNoSys)
+        ) {
+          continue;
         }
+
+        newExperiments.push(formatRepoForCard(repo));
       }
 
       if (newExperiments.length > 0 && isMounted) {

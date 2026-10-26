@@ -1,6 +1,6 @@
 // File Name: githubSync.js
 const GITHUB_USERNAME = "himanvic";
-const CACHE_KEY = "himanvic_github_repos_v2";
+const CACHE_KEY = "himanvic_github_repos_v3";
 const CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes cache
 
 // Curated image mappings for known repositories
@@ -12,6 +12,7 @@ const REPO_IMAGES = {
   "bottelneck.sys": "/assets/images/projects/bottelneck.png",
   "bottelneck": "/assets/images/projects/bottelneck.png",
   "sanskode": "/assets/images/projects/sanskode.png",
+  "quantum-gravity-shift": "/assets/images/projects/quantum-gravity-shift.png",
 };
 
 /**
@@ -50,10 +51,11 @@ export async function fetchGitHubRepos() {
     const repos = await response.json();
     if (!Array.isArray(repos)) return null;
 
-    // Filter out the portfolio repository itself and forks
+    // Filter out the portfolio repository itself, profile readme repo, forks, and private repos
     const filteredRepos = repos.filter(
       (repo) =>
         repo.name !== "himanvic-portfolio" &&
+        repo.name.toLowerCase() !== GITHUB_USERNAME.toLowerCase() &&
         !repo.fork &&
         !repo.private
     );
@@ -86,17 +88,32 @@ export function formatRepoForCard(repo) {
       ? "Python"
       : "Code");
 
-  const topics = [
+  const cleanNameLower = repo.name.toLowerCase();
+
+  const DEFAULT_DESCRIPTIONS = {
+    "quantum-gravity-shift":
+      "Interactive 2D orbital gravity & quantum physics simulation built with HTML5 Canvas and dynamic particle physics.",
+  };
+
+  const DEFAULT_TOPICS = {
+    "quantum-gravity-shift": ["Physics Simulation", "HTML5 Canvas", "Orbital Gravity"],
+  };
+
+  const fallbackTopics = DEFAULT_TOPICS[cleanNameLower] || [];
+
+  const rawTopics = [
     language,
     ...(repo.topics || []).filter(
       (t) => t.toLowerCase() !== language.toLowerCase() && t !== "featured"
     ),
-  ].slice(0, 4);
+  ];
+
+  const topics = (rawTopics.length > 1 ? rawTopics : [...rawTopics, ...fallbackTopics]).slice(0, 4);
 
   const localImage =
     REPO_IMAGES[repo.name] ||
-    REPO_IMAGES[repo.name.toLowerCase()] ||
-    REPO_IMAGES[repo.name.replace(".sys", "")];
+    REPO_IMAGES[cleanNameLower] ||
+    REPO_IMAGES[cleanNameLower.replace(".sys", "")];
 
   // GitHub provides automatic dynamic open graph preview images for every public repo
   const fallbackImage = `https://opengraph.githubassets.com/1/${GITHUB_USERNAME}/${repo.name}`;
@@ -106,6 +123,7 @@ export function formatRepoForCard(repo) {
     name: repo.name,
     description:
       repo.description ||
+      DEFAULT_DESCRIPTIONS[cleanNameLower] ||
       "Systems, algorithmic, and experimental software engineering repository on GitHub.",
     tech: topics.length > 0 ? topics : [language, "GitHub"],
     link: repo.homepage || repo.html_url,
