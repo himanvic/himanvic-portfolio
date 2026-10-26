@@ -17,29 +17,29 @@ const Footer = () => {
   };
 
   return (
-    <footer className="w-full text-white bg-[#060714]/90 backdrop-blur-2xl relative z-10 overflow-hidden">
-      {/* Top cosmic glowing divider */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
+    <footer className="w-full text-white bg-[#030712]/95 backdrop-blur-2xl relative z-10 overflow-hidden">
+      {/* Top cyber glowing divider */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
 
       {/* Atmospheric ambient glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[300px] bg-purple-700/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[300px] bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-16 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 pb-12 border-b border-purple-500/15">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 pb-12 border-b border-cyan-500/15">
           {/* Column 1 & 2: Brand Identity & Philosophy (Spans 2 cols on lg) */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <img
                 src="/favicon.svg"
                 alt="Himanvic logo"
-                className="w-9 h-9 rounded-xl border border-purple-500/40 p-0.5 bg-purple-950/40 shadow-[0_0_15px_rgba(168,85,247,0.35)]"
+                className="w-9 h-9 rounded-xl border border-cyan-500/40 p-0.5 bg-cyan-950/40 shadow-[0_0_15px_rgba(6,182,212,0.35)]"
               />
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-300 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-amber-300 bg-clip-text text-transparent">
                 Himanvic
               </span>
             </div>
 
-            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm">
+            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm font-light">
               Student developer exploring systems, algorithms, and real-time interactive simulations. Building foundational programming depth with C++ and Python.
             </p>
 
@@ -53,7 +53,7 @@ const Footer = () => {
 
           {/* Column 3: Featured Creations */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-purple-300/90 font-mono">
+            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-cyan-400/90 font-mono">
               Live Projects
             </h3>
             <ul className="flex flex-col gap-2.5 text-xs sm:text-sm text-gray-400">
@@ -93,7 +93,7 @@ const Footer = () => {
               <li className="pt-1">
                 <Link
                   to="/projects"
-                  className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                  className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors font-mono"
                 >
                   View All Projects →
                 </Link>
@@ -103,7 +103,7 @@ const Footer = () => {
 
           {/* Column 4: Quick Navigation */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-purple-300/90 font-mono">
+            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-cyan-400/90 font-mono">
               Navigation
             </h3>
             <ul className="flex flex-col gap-2.5 text-xs sm:text-sm text-gray-400">
@@ -132,7 +132,7 @@ const Footer = () => {
 
           {/* Column 5: Connect & Socials */}
           <div className="flex flex-col gap-3">
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-purple-300/90 font-mono">
+            <h3 className="text-white font-semibold text-sm tracking-wider uppercase text-cyan-400/90 font-mono">
               Connect
             </h3>
             <ul className="flex flex-col gap-2.5 text-xs sm:text-sm text-gray-400">
@@ -163,7 +163,7 @@ const Footer = () => {
                   href="https://huggingface.co/himanvic"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-2"
+                  className="hover:text-amber-300 transition-colors flex items-center gap-2"
                 >
                   <SiHuggingface className="text-sm" />
                   <span>Hugging Face</span>
@@ -174,10 +174,10 @@ const Footer = () => {
                   href="https://github.com/himanvic/himanvic-portfolio"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-purple-300 transition-colors flex items-center gap-1.5"
+                  className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1.5 pt-1 font-mono"
                 >
-                  <span>Source Code</span>
-                  <FaExternalLinkAlt className="text-[10px] opacity-70" />
+                  <span>Repository</span>
+                  <FaExternalLinkAlt className="text-[10px]" />
                 </a>
               </li>
             </ul>
@@ -185,13 +185,15 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar: Copyright & Back to Top */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4">
-          <p>© {yearDisplay} • Designed &amp; built by Himanvic</p>
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+          <p className="text-center sm:text-left">
+            © {yearDisplay} • Designed &amp; built by{" "}
+            <span className="text-gray-200 font-medium">Himanvic</span>. All rights reserved.
+          </p>
 
           <button
             onClick={scrollToTop}
-            aria-label="Back to top"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-purple-400 hover:bg-purple-950/40 text-gray-300 hover:text-white transition-all cursor-pointer shadow-sm group"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-950/40 text-gray-300 hover:text-white transition-all cursor-pointer shadow-sm group"
           >
             <span>Back to top</span>
             <FaArrowUp className="text-[10px] group-hover:-translate-y-0.5 transition-transform" />

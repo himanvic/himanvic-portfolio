@@ -8,9 +8,9 @@ const Hero = () => {
       id="hero"
       className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
     >
-      {/* Blackhole background video */}
+      {/* Background ambient video */}
       <video
-        className="absolute top-[-300px] left-0 w-full h-full object-cover z-[-1] rotate-180 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] [clip-path:inset(5%_0_5%_0)] pointer-events-none"
+        className="absolute top-[-300px] left-0 w-full h-full object-cover z-[-1] rotate-180 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] [clip-path:inset(5%_0_5%_0)] pointer-events-none opacity-40"
         autoPlay
         loop
         muted
@@ -24,7 +24,7 @@ const Hero = () => {
         {/* LEFT: TEXT & CALL TO ACTIONS */}
         <div className="flex-1 text-center lg:text-left px-2 max-w-2xl lg:max-w-none">
           {/* Beacon Status Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md text-emerald-300 text-xs sm:text-sm font-medium tracking-wide shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md text-emerald-300 text-xs sm:text-sm font-mono font-medium tracking-wide shadow-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
@@ -35,7 +35,7 @@ const Hero = () => {
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.12]">
             Turning{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 inline-block pb-2">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-amber-300 inline-block pb-2">
               Curiosity
             </span>{" "}
             into Code,
@@ -52,7 +52,7 @@ const Hero = () => {
           <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4">
             <a
               href="#projects"
-              className="px-7 py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white font-medium rounded-full shadow-[0_0_24px_rgba(147,51,234,0.4)] hover:shadow-[0_0_32px_rgba(147,51,234,0.7)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 group cursor-pointer"
+              className="px-7 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-sky-500 text-white font-medium rounded-full shadow-[0_0_24px_rgba(6,182,212,0.4)] hover:shadow-[0_0_32px_rgba(6,182,212,0.7)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 group cursor-pointer"
             >
               <span>Explore Projects</span>
               <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>
@@ -60,7 +60,7 @@ const Hero = () => {
 
             <a
               href="#about"
-              className="px-6 py-3.5 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-md text-gray-200 hover:text-white font-medium hover:border-white/40 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3.5 rounded-full border border-cyan-500/20 bg-slate-900/60 hover:bg-slate-900/90 backdrop-blur-md text-gray-200 hover:text-white font-medium hover:border-cyan-400/50 transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <span>My Journey</span>
               <span className="text-amber-400">⚡</span>
@@ -74,7 +74,7 @@ const Hero = () => {
 
           {/* Dynamic Titles beneath the Solar System */}
           <div className="mt-8 sm:mt-12 text-center">
-            <div className="text-[11px] uppercase tracking-widest text-gray-400 font-mono mb-2">
+            <div className="text-[11px] uppercase tracking-widest text-cyan-400/80 font-mono mb-2 font-semibold">
               Focus &amp; Craft
             </div>
             <RotatingTitles />

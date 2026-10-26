@@ -53,9 +53,9 @@ const PLANETS = [
     name: "GitHub",
     role: "Open Source Collab",
     icon: SiGithub,
-    color: "#c084fc",
-    glow: "rgba(192, 132, 252, 0.5)",
-    border: "border-purple-400/40",
+    color: "#a5f3fc",
+    glow: "rgba(165, 243, 252, 0.5)",
+    border: "border-cyan-300/40",
   },
 ];
 
@@ -181,9 +181,9 @@ const OrbitIcons = () => {
         <defs>
           <linearGradient id="orbitLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-            <stop offset="40%" stopColor="#a855f7" stopOpacity="0.5" />
-            <stop offset="70%" stopColor="#eab308" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#ec4899" stopOpacity="0.3" />
+            <stop offset="35%" stopColor="#06b6d4" stopOpacity="0.6" />
+            <stop offset="70%" stopColor="#facc15" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.3" />
           </linearGradient>
         </defs>
         <ellipse
@@ -202,22 +202,22 @@ const OrbitIcons = () => {
       {/* 2. Central "H" Sun (z-20) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-auto group">
         {/* Outer Solar Corona Glow */}
-        <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-r from-amber-500/20 via-purple-600/20 to-cyan-500/20 blur-2xl animate-pulse pointer-events-none" />
+        <div className="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-r from-amber-500/20 via-cyan-500/20 to-blue-500/20 blur-2xl animate-pulse pointer-events-none" />
 
         {/* Ambient Orbiting Solar Corona Rings */}
         <div className="absolute w-32 h-32 sm:w-36 sm:h-36 rounded-full border border-amber-400/25 border-dashed animate-spin-slow pointer-events-none" />
         <div
-          className="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full border border-purple-400/20 pointer-events-none"
+          className="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full border border-cyan-400/20 pointer-events-none"
           style={{ animation: "spin 18s linear infinite reverse" }}
         />
 
         {/* Sun Core Disc */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-amber-500/30 via-purple-900/50 to-slate-950/90 border border-amber-400/50 shadow-[0_0_35px_rgba(245,158,11,0.45)] backdrop-blur-xl flex flex-col items-center justify-center relative transition-transform duration-300 group-hover:scale-105 cursor-pointer">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-amber-500/30 via-slate-900/80 to-cyan-950/90 border border-amber-400/50 shadow-[0_0_35px_rgba(245,158,11,0.45)] backdrop-blur-xl flex flex-col items-center justify-center relative transition-transform duration-300 group-hover:scale-105 cursor-pointer">
           <div className="flex flex-col items-center justify-center">
             <span className="text-3xl sm:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-amber-200 via-yellow-300 to-amber-500 drop-shadow-[0_0_16px_rgba(251,191,36,0.9)]">
               H
             </span>
-            <span className="text-[8px] sm:text-[9px] tracking-widest font-mono uppercase text-amber-300/80 -mt-1 font-semibold">
+            <span className="text-[8px] sm:text-[9px] tracking-widest font-mono uppercase text-amber-300/90 -mt-1 font-semibold">
               STAR
             </span>
           </div>
