@@ -9,7 +9,7 @@
 [![Live Portfolio](https://img.shields.io/badge/Live_Portfolio-himanvic.pages.dev-00f0ff?style=for-the-badge&logo=cloudflarepages&logoColor=black)](https://himanvic.pages.dev)
 [![C++](https://img.shields.io/badge/C++-Systems_&_Algorithms-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)](https://github.com/himanvic/bottelneck.sys)
 [![Python](https://img.shields.io/badge/Python-Logic_&_Math-facc15?style=for-the-badge&logo=python&logoColor=black)](https://github.com/himanvic/sanskode)
-[![License: Proprietary](https://img.shields.io/badge/License-All_Rights_Reserved-red.svg?style=for-the-badge)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-38bdf8.svg?style=for-the-badge)](./LICENSE)
 
 ---
 
