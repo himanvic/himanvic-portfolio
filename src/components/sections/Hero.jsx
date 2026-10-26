@@ -8,16 +8,18 @@ const Hero = () => {
       id="hero"
       className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
     >
-      {/* Background ambient video */}
-      <video
-        className="absolute top-[-300px] left-0 w-full h-full object-cover z-[-1] rotate-180 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] [clip-path:inset(5%_0_5%_0)] pointer-events-none opacity-45"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="/assets/videos/hero.mp4" type="video/mp4" />
-      </video>
+      {/* Background ambient video - Cropped to exact top navbar area */}
+      <div className="absolute top-0 left-0 w-full h-[260px] sm:h-[300px] overflow-hidden pointer-events-none z-[-1] [mask-image:linear-gradient(to_bottom,black_25%,transparent_100%)]">
+        <video
+          className="w-full h-full object-cover object-center opacity-50"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/assets/videos/hero.mp4" type="video/mp4" />
+        </video>
+      </div>
 
       {/* Hero content container */}
       <div className="relative z-10 max-w-7xl w-full flex flex-col lg:flex-row items-center justify-between gap-12 sm:gap-16 lg:gap-8">
