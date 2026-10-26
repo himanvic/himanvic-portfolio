@@ -8,18 +8,20 @@ const Hero = () => {
       id="hero"
       className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
     >
-      {/* Background ambient video - 3D Tilted Chandelier Canopy (Full 100% Quality, Above Stars) */}
+      {/* Background ambient video - Upside Down Top Canopy (Full 100% Quality, Above Stars) */}
       <div
         className="absolute top-0 left-0 w-full h-[360px] sm:h-[440px] overflow-hidden pointer-events-none z-0"
         style={{
           perspective: "1000px",
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
         }}
       >
         <video
           className="w-full h-full object-cover"
           style={{
-            transform: "rotate(180deg) rotateX(15deg)",
-            transformOrigin: "top center",
+            transform: "rotate(180deg) rotateX(12deg)",
+            transformOrigin: "center center",
           }}
           autoPlay
           loop
