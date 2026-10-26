@@ -74,6 +74,14 @@ const Footer = () => {
             My Projects
           </a>
           <a
+            href="https://github.com/himanvic/himanvic-portfolio"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors"
+          >
+            Portfolio Source Code
+          </a>
+          <a
             href="https://x.com/Himanvic_dev"
             target="_blank"
             rel="noopener noreferrer"

@@ -6,7 +6,8 @@ A personal developer portfolio showcasing my live websites, creative experiments
 
 I'm an aspiring software developer who enjoys turning ideas into digital experiences. I'm currently learning C++ and Python while building and experimenting with web projects.
 
-**GitHub:** https://github.com/himanvic
+**GitHub:** https://github.com/himanvic  
+**Repository:** https://github.com/himanvic/himanvic-portfolio
 
 ## Live Projects
 

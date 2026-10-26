@@ -25,12 +25,12 @@ const Navbar = () => {
             Projects
           </Link>
           <a
-            href="https://github.com/himanvic"
+            href="https://github.com/himanvic/himanvic-portfolio"
             target="_blank"
             rel="noreferrer"
             className="hover:text-purple-300 transition-colors"
           >
-            GitHub
+            Source Code
           </a>
         </nav>
 

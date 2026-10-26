@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/himanvic/himanvic-portfolio"
+  },
+  "homepage": "https://github.com/himanvic/himanvic-portfolio",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
