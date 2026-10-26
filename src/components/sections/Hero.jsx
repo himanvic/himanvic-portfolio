@@ -16,7 +16,7 @@ const Hero = () => {
         muted
         playsInline
       >
-        <source src="/assets/videos/blackhole.webm" type="video/webm" />
+        <source src="/assets/videos/hero.mp4" type="video/mp4" />
       </video>
 
       {/* Hero content container */}
