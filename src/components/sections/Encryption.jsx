@@ -1,6 +1,97 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { slideInFromTop } from "../../utils/motion";
+
+const CosmicField = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+
+    const resize = () => {
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const particles = [];
+    const count = Math.min(65, Math.floor((canvas.width * canvas.height) / 18000));
+    const colors = ["#a855f7", "#818cf8", "#38bdf8", "#c084fc", "#60a5fa"];
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        radius: Math.random() * 2 + 1,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.6 + 0.3,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw particle connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.18;
+            ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw and update particles
+      for (const p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+      }
+
+      ctx.globalAlpha = 1.0;
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-60"
+    />
+  );
+};
 
 const Encryption = () => {
   return (
@@ -21,7 +112,7 @@ const Encryption = () => {
         </motion.div>
       </div>
 
-      {/* Lock + Button */}
+      {/* Central Emblem + Badge */}
       <div className="flex flex-col items-center justify-center absolute z-[20] -translate-y-16">
         <div className="relative group cursor-pointer flex items-center justify-center w-36 h-36 select-none">
           {/* Atmospheric Holographic Halo */}
@@ -129,6 +220,8 @@ const Encryption = () => {
             H
           </span>
         </div>
+
+        {/* Existing Welcome-box badge */}
         <div className="Welcome-box px-4 py-1 z-[20] border mt-6 border-[#7042F88B] opacity-90">
           <h1 className="text-sm text-white">Aspiring Software Developer</h1>
         </div>
@@ -141,18 +234,10 @@ const Encryption = () => {
         </p>
       </div>
 
-      {/* Background Video */}
-      <div className="absolute top-0 left-0 w-full h-full flex justify-center items-start">
-        <video
-          loop
-          muted
-          autoPlay
-          playsInline
-          preload="false"
-          className="w-full h-auto object-cover opacity-80"
-        >
-          <source src="/assets/videos/encryption.webm" type="video/webm" />
-        </video>
+      {/* Atmospheric Cosmic Constellation Field (Replaced old encryption padlock video) */}
+      <div className="absolute inset-0 w-full h-full flex justify-center items-center overflow-hidden">
+        <div className="absolute w-[600px] h-[600px] rounded-full bg-radial-gradient from-purple-900/25 via-blue-900/15 to-transparent blur-3xl pointer-events-none" />
+        <CosmicField />
       </div>
     </div>
   );
