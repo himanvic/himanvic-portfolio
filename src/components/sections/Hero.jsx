@@ -8,10 +8,19 @@ const Hero = () => {
       id="hero"
       className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
     >
-      {/* Background ambient video - Cropped to exact top navbar area */}
-      <div className="absolute top-0 left-0 w-full h-[260px] sm:h-[300px] overflow-hidden pointer-events-none z-[-1] [mask-image:linear-gradient(to_bottom,black_25%,transparent_100%)]">
+      {/* Background ambient video - 3D Tilted Chandelier Canopy (Full 100% Quality, Above Stars) */}
+      <div
+        className="absolute top-0 left-0 w-full h-[360px] sm:h-[440px] overflow-hidden pointer-events-none z-0"
+        style={{
+          perspective: "1000px",
+        }}
+      >
         <video
-          className="w-full h-full object-cover object-center opacity-50"
+          className="w-full h-full object-cover"
+          style={{
+            transform: "rotate(180deg) rotateX(15deg)",
+            transformOrigin: "top center",
+          }}
           autoPlay
           loop
           muted
