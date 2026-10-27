@@ -15,7 +15,7 @@ import {
 const Projects = () => {
   const [projectList, setProjectList] = useState(PROJECTS);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [, setDirection] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(

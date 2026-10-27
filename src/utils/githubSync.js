@@ -30,7 +30,7 @@ export async function fetchGitHubRepos() {
         if (Date.now() - timestamp < CACHE_EXPIRY_MS && Array.isArray(data)) {
           return data;
         }
-      } catch (e) {
+      } catch {
         // Cache read error, continue to fetch
       }
     }
@@ -66,12 +66,12 @@ export async function fetchGitHubRepos() {
         CACHE_KEY,
         JSON.stringify({ timestamp: Date.now(), data: filteredRepos })
       );
-    } catch (e) {
+    } catch {
       // Storage quota or private mode error
     }
 
     return filteredRepos;
-  } catch (err) {
+  } catch {
     return null;
   }
 }
@@ -118,6 +118,19 @@ export function formatRepoForCard(repo) {
   // GitHub provides automatic dynamic open graph preview images for every public repo
   const fallbackImage = `https://opengraph.githubassets.com/1/${GITHUB_USERNAME}/${repo.name}`;
 
+  // Validate homepage URL: strictly require secure https:// protocol to prevent protocol poisoning (e.g. javascript:)
+  const isValidHttpsUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+    try {
+      const parsed = new URL(url.trim());
+      return parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
+
+  const safeLink = isValidHttpsUrl(repo.homepage) ? repo.homepage.trim() : repo.html_url;
+
   return {
     id: `gh-${repo.id}`,
     name: repo.name,
@@ -126,7 +139,7 @@ export function formatRepoForCard(repo) {
       DEFAULT_DESCRIPTIONS[cleanNameLower] ||
       "Systems, algorithmic, and experimental software engineering repository on GitHub.",
     tech: topics.length > 0 ? topics : [language, "GitHub"],
-    link: repo.homepage || repo.html_url,
+    link: safeLink,
     image: localImage || fallbackImage,
     stars: repo.stargazers_count || 0,
     isFeatured: (repo.topics || []).includes("featured"),

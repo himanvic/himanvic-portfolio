@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
-import { useRef, useState, Suspense } from "react";
+import { useRef, Suspense } from "react";
 import * as random from "maath/random";
 
 const MAX_STARS = 10000;

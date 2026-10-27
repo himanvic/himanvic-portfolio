@@ -26,13 +26,13 @@ const ProjectGallery = () => {
         existingIdentifiers.add(cleanProjectName.replace(/sys$/, ""));
 
         if (project.link) {
-          const urlMatch = project.link.toLowerCase().match(/(?:https?:\/\/)?([^\.\/]+)/);
+          const urlMatch = project.link.toLowerCase().match(/(?:https?:\/\/)?([^./]+)/);
           if (urlMatch && urlMatch[1]) {
             const domainSlug = urlMatch[1].replace(/[^a-z0-9]/g, "");
             existingIdentifiers.add(domainSlug);
             existingIdentifiers.add(domainSlug.replace(/website$/, ""));
           }
-          const ghMatch = project.link.toLowerCase().match(/github\.com\/[^\/]+\/([^\/?#]+)/);
+          const ghMatch = project.link.toLowerCase().match(/github\.com\/([^/]+)\/([^/?#]+)/);
           if (ghMatch && ghMatch[1]) {
             const repoSlug = ghMatch[1].replace(/[^a-z0-9]/g, "");
             existingIdentifiers.add(repoSlug);
