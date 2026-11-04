@@ -1,5 +1,5 @@
 // File Name: HoloCore3D.jsx
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -7,8 +7,9 @@ import * as THREE from "three";
  * 3D Holographic Singularity Core
  * Combines a counter-rotating Icosahedron wireframe lattice,
  * an inner glowing Octahedron crystal, and an orbiting energy ring.
+ * Optimized with viewport IntersectionObserver and capped DPR.
  */
-const CoreMesh = ({ isHovered }) => {
+const CoreMesh = ({ isHovered, isVisible }) => {
   const outerRef = useRef();
   const innerRef = useRef();
   const ringRef = useRef();
@@ -25,6 +26,9 @@ const CoreMesh = ({ isHovered }) => {
   }, []);
 
   useFrame((state, delta) => {
+    // 0% GPU execution when Hero section is scrolled off-screen
+    if (!isVisible) return;
+
     const speedMultiplier = isHovered ? 2.5 : 1.0;
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
@@ -106,18 +110,39 @@ const CoreMesh = ({ isHovered }) => {
 };
 
 export const HoloCore3D = ({ isHovered }) => {
+  const containerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="w-full h-full relative pointer-events-none">
+    <div ref={containerRef} className="w-full h-full relative pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 3.8], fov: 45 }}
-        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: false }}
+        dpr={[1, 1.25]}
+        gl={{
+          antialias: true,
+          alpha: true,
+          preserveDrawingBuffer: false,
+          powerPreference: "low-power",
+        }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0);
         }}
         style={{ background: "transparent" }}
       >
         <ambientLight intensity={0.5} />
-        <CoreMesh isHovered={isHovered} />
+        <CoreMesh isHovered={isHovered} isVisible={isVisible} />
       </Canvas>
     </div>
   );
