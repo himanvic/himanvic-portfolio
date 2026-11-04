@@ -1,7 +1,7 @@
 // File Name: CommandPalette.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaTerminal, FaTimes, FaRocket, FaCode } from "react-icons/fa";
+import { FaTerminal, FaTimes, FaRocket, FaCode, FaGlobeAmericas } from "react-icons/fa";
 import { playCyberBlip } from "@/utils/audio";
 
 const triggerHyperspaceWarp = () => {
@@ -11,6 +11,7 @@ const triggerHyperspaceWarp = () => {
 };
 
 const HELP_COMMANDS = [
+  { cmd: "earth", desc: "Warp to real-time 3D Earth (NASA Day/Night)" },
   { cmd: "algo", desc: "Open interactive live algorithm visualizer" },
   { cmd: "warp", desc: "Engage Three.js hyperspace warp speed" },
   { cmd: "c++", desc: "Display C++ systems architecture profile" },
@@ -76,6 +77,19 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
         newLogs.push({
           type: "output",
           text: HELP_COMMANDS.map((c) => `  ${c.cmd.padEnd(10)} - ${c.desc}`).join("\n"),
+        });
+        break;
+
+      case "earth":
+      case "globe":
+      case "world":
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("open-earth-modal"));
+        }
+        setIsOpen(false);
+        newLogs.push({
+          type: "success",
+          text: "🌍 Warping to real-time 3D Earth with NASA day/night terminator...",
         });
         break;
 
@@ -224,6 +238,13 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
             {/* Quick Action Pills for One-Click Execution (Mobile & Desktop Friendly) */}
             <div className="flex items-center gap-1.5 p-3 bg-black/30 border-b border-white/5 overflow-x-auto scrollbar-none text-[11px] font-mono">
               <span className="text-gray-500 mr-1 hidden sm:inline">Quick:</span>
+              <button
+                onClick={() => executeCommand("earth")}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
+              >
+                <FaGlobeAmericas className="text-[9px]" />
+                <span>earth</span>
+              </button>
               <button
                 onClick={() => executeCommand("warp")}
                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
