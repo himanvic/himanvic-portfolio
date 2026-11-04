@@ -9,7 +9,7 @@ import { playWarpSound, playCyberBlip } from "@/utils/audio";
 /**
  * Convert Latitude & Longitude to 3D Cartesian Coordinates on a Sphere
  */
-const latLongToVector3 = (lat, lon, radius) => {
+const _latLongToVector3 = (lat, lon, radius) => {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lon + 180) * (Math.PI / 180);
   const x = -(radius * Math.sin(phi) * Math.cos(theta));
@@ -101,6 +101,16 @@ const EarthModel = () => {
   // Exact Cartesian coordinates for India on Three.js Sphere (20.59° N, 78.96° E)
   const indiaPos = useMemo(() => new THREE.Vector3(0.188, 0.344, -0.941), []);
 
+  useEffect(() => {
+    return () => {
+      dayMap?.dispose();
+      nightMap?.dispose();
+      cloudsMap?.dispose();
+      specularMap?.dispose();
+      earthMaterial?.dispose();
+    };
+  }, [dayMap, nightMap, cloudsMap, specularMap, earthMaterial]);
+
   useFrame((state, delta) => {
     // Gentle axial rotation of Earth
     if (earthRef.current) {
@@ -181,6 +191,11 @@ export const RealTimeEarthModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!isOpen) return;
 
+    // Signal app that 3D Earth is open so background starfield can pause
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("earth-modal-active", { detail: { active: true } }));
+    }
+
     playWarpSound();
 
     const updateClock = () => {
@@ -200,6 +215,9 @@ export const RealTimeEarthModal = ({ isOpen, onClose }) => {
     return () => {
       clearInterval(interval);
       window.removeEventListener("keydown", handleKeyDown);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("earth-modal-active", { detail: { active: false } }));
+      }
     };
   }, [isOpen, onClose]);
 
@@ -269,7 +287,13 @@ export const RealTimeEarthModal = ({ isOpen, onClose }) => {
           >
             <Canvas
               camera={{ position: [0.6, 0.4, -2.4], fov: 45 }}
-              gl={{ antialias: true, alpha: true }}
+              dpr={[1, 1.25]}
+              gl={{
+                antialias: true,
+                alpha: true,
+                preserveDrawingBuffer: false,
+                powerPreference: "high-performance",
+              }}
               style={{ background: "transparent" }}
             >
               <ambientLight intensity={0.15} />

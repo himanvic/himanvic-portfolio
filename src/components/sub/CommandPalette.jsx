@@ -64,7 +64,8 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
   }, [logs, isOpen]);
 
   const executeCommand = (rawCmd) => {
-    const cmd = rawCmd.trim().toLowerCase();
+    const cleanRaw = String(rawCmd || "").slice(0, 80);
+    const cmd = cleanRaw.trim().toLowerCase();
     if (!cmd) return;
 
     playCyberBlip(780, 0.035);
@@ -155,7 +156,7 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
         break;
 
       case "github":
-        window.open("https://github.com/himanvic", "_blank");
+        window.open("https://github.com/himanvic", "_blank", "noopener,noreferrer");
         newLogs.push({ type: "success", text: "Opening https://github.com/himanvic..." });
         break;
 

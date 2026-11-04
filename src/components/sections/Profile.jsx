@@ -46,7 +46,7 @@ const WORDS = [
   },
 ];
 
-const PARTICLE_COUNT = 1800;
+const PARTICLE_COUNT = 900;
 
 const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
   const canvasRef = useRef(null);
@@ -224,6 +224,28 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
       resizeObserver.observe(containerRef.current);
     }
 
+    let isVisible = true;
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          if (!animFrameRef.current) {
+            animFrameRef.current = requestAnimationFrame(render);
+          }
+        } else {
+          if (animFrameRef.current) {
+            cancelAnimationFrame(animFrameRef.current);
+            animFrameRef.current = null;
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    if (containerRef.current) {
+      intersectionObserver.observe(containerRef.current);
+    }
+
     // Animation render loop
     const render = (time) => {
       const rect = canvas.getBoundingClientRect();
@@ -258,10 +280,12 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
         ctx.strokeStyle = rip.color;
         ctx.globalAlpha = rip.alpha;
         ctx.lineWidth = 2.5;
-        ctx.shadowColor = rip.color;
-        ctx.shadowBlur = 12;
         ctx.beginPath();
         ctx.arc(rip.x, rip.y, rip.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        // Hardware-accelerated halo ring without software Gaussian blur
+        ctx.globalAlpha = rip.alpha * 0.35;
+        ctx.lineWidth = 6;
         ctx.stroke();
         ctx.restore();
       }
@@ -308,6 +332,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
         ctx.fill();
       }
 
+      if (!isVisible) return;
       animFrameRef.current = requestAnimationFrame(render);
     };
 
@@ -316,6 +341,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
     };
   }, [applyWordMorph, getWordTargets, onWordChange]);
 

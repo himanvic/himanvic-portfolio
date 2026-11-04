@@ -85,6 +85,8 @@ const SolarSystem = () => {
     ry: 78,
   });
 
+  const containerRef = useRef(null);
+  const isVisibleRef = useRef(true);
   const planetRefs = useRef([]);
   const angleRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
@@ -172,18 +174,47 @@ const SolarSystem = () => {
         el.style.filter = `brightness(${brightness.toFixed(2)})`;
       });
 
+      if (!isVisibleRef.current) {
+        animFrameRef.current = null;
+        return;
+      }
       animFrameRef.current = requestAnimationFrame(animate);
+
+
+
+
     };
 
     animFrameRef.current = requestAnimationFrame(animate);
 
+
+
+
+
+    let observer = null;
+    if (typeof IntersectionObserver !== "undefined" && containerRef.current) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisibleRef.current = entry.isIntersecting;
+          if (entry.isIntersecting && !animFrameRef.current) {
+            lastTimeRef.current = performance.now();
+            animFrameRef.current = requestAnimationFrame(animate);
+          }
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(containerRef.current);
+    }
+
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      observer?.disconnect();
     };
   }, [dimensions, isPaused]);
 
   return (
     <div
+      ref={containerRef}
       className="relative w-[310px] h-[250px] sm:w-[410px] sm:h-[280px] flex items-center justify-center select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
