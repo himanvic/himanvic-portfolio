@@ -33,4 +33,10 @@ export default [
       ],
     },
   },
+  {
+    files: ['src/main.jsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ]

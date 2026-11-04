@@ -99,8 +99,17 @@ const Navbar = () => {
           </a>
         </nav>
 
-        {/* Right: Glassmorphic Social Badges (Desktop) */}
+        {/* Right: Glassmorphic Social Badges & Terminal Trigger (Desktop) */}
         <div className="hidden sm:flex items-center gap-2">
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all hover:scale-105 cursor-pointer shadow-sm"
+            title="Open Developer Terminal (Ctrl + K)"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="font-bold">Ctrl K</span>
+          </button>
+
           <a
             href="https://github.com/himanvic"
             target="_blank"

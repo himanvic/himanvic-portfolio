@@ -1,17 +1,66 @@
 // File Name: ProjectGalleryCard.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { SiCplusplus, SiPython } from "react-icons/si";
 import { FaGithub, FaStar, FaExternalLinkAlt } from "react-icons/fa";
 
 const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => {
   const [imgError, setImgError] = useState(!image);
-  const isGithub = link && link.includes("github.com");
+  const cardRef = useRef(null);
+  const [transformStyle, setTransformStyle] = useState("");
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
 
+  const isGithub = link && link.includes("github.com");
   const hasCpp = tech?.some((t) => t.toLowerCase().includes("c++") || t.toLowerCase() === "cpp");
   const hasPython = tech?.some((t) => t.toLowerCase().includes("python"));
 
+  // 3D Perspective Tilt & Holographic Specular Glare
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+
+    setTransformStyle(
+      `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`
+    );
+    setGlare({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+      opacity: 0.18,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTransformStyle("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+    setGlare((prev) => ({ ...prev, opacity: 0 }));
+  };
+
   return (
-    <div className="bg-[#090d1f]/90 rounded-2xl shadow-xl overflow-hidden w-[300px] sm:w-[340px] hover:scale-[1.03] transition-all duration-300 border border-cyan-500/25 hover:border-cyan-400/50 flex flex-col justify-between backdrop-blur-xl group">
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: transformStyle,
+        transformStyle: "preserve-3d",
+        transition: "transform 0.15s ease-out",
+      }}
+      className="bg-[#090d1f]/90 rounded-2xl shadow-xl overflow-hidden w-[300px] sm:w-[340px] border border-cyan-500/25 hover:border-cyan-400/50 flex flex-col justify-between backdrop-blur-xl group relative"
+    >
+      {/* Dynamic Specular Holographic Sheen */}
+      <div
+        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300 rounded-2xl"
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle 240px at ${glare.x}% ${glare.y}%, rgba(0, 240, 255, 0.35), rgba(250, 204, 21, 0.15) 40%, transparent 80%)`,
+        }}
+      />
+
       <div>
         {/* Header Visual: Image or Cyber Language Holographic Fallback */}
         <div className="relative w-full h-48 overflow-hidden bg-[#060914] flex items-center justify-center">
