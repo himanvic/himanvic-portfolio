@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTerminal, FaTimes, FaRocket, FaCode } from "react-icons/fa";
+import { playCyberBlip } from "@/utils/audio";
 
 const triggerHyperspaceWarp = () => {
   if (typeof window !== "undefined") {
@@ -64,6 +65,8 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
   const executeCommand = (rawCmd) => {
     const cmd = rawCmd.trim().toLowerCase();
     if (!cmd) return;
+
+    playCyberBlip(780, 0.035);
 
     const userEntry = { type: "user", text: `> ${rawCmd}` };
     const newLogs = [...logs, userEntry];
@@ -148,6 +151,8 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
         return;
 
       case "exit":
+      case "close":
+      case "quit":
         setIsOpen(false);
         setInput("");
         return;
@@ -186,8 +191,14 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
 
       {/* Terminal Modal Dialog */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in">
-          <div className="relative w-full max-w-2xl bg-[#060a17]/98 border border-cyan-500/40 rounded-3xl shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[85vh]">
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl bg-[#060a17]/98 border border-cyan-500/40 rounded-3xl shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[85vh] cursor-default"
+          >
             {/* Terminal Window Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/20 bg-black/50 select-none">
               <div className="flex items-center gap-2.5">

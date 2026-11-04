@@ -99,8 +99,16 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       generateNewArray();
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          isSortingRef.current = false;
+          onClose();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -209,8 +217,17 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
   const currentInfo = CODE_SNIPPETS[algorithm];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-[#080d1e]/95 border border-cyan-500/40 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[92vh]">
+    <div
+      onClick={() => {
+        isSortingRef.current = false;
+        onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-4xl bg-[#080d1e]/95 border border-cyan-500/40 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[92vh] cursor-default"
+      >
         {/* Terminal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-cyan-500/20 bg-black/40">
           <div className="flex items-center gap-3">
