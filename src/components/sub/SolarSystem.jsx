@@ -1,5 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 import HoloCore3D from "./HoloCore3D";
+
+// Lazy load 3D Earth modal for optimal initial performance
+const RealTimeEarthModal = lazy(() => import("./RealTimeEarthModal"));
 import {
   SiCplusplus,
   SiPython,
@@ -70,6 +73,13 @@ const SolarSystem = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isCoreHovered, setIsCoreHovered] = useState(false);
+  const [isEarthModalOpen, setIsEarthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenEarth = () => setIsEarthModalOpen(true);
+    window.addEventListener("open-earth-modal", handleOpenEarth);
+    return () => window.removeEventListener("open-earth-modal", handleOpenEarth);
+  }, []);
   const [dimensions, setDimensions] = useState({
     rx: 175,
     ry: 78,
@@ -232,6 +242,8 @@ const SolarSystem = () => {
 
         {/* Master Core Orb (Deep Obsidian Cosmic Glass with Inset Bloom & Real 3D Three.js Lattice) */}
         <div
+          onClick={() => setIsEarthModalOpen(true)}
+          title="Click Singularity to warp to Real-Time 3D Earth (NASA Day/Night)"
           className="w-22 h-22 sm:w-26 sm:h-26 rounded-full bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30 overflow-visible"
           onMouseEnter={() => setIsCoreHovered(true)}
           onMouseLeave={() => setIsCoreHovered(false)}
@@ -308,6 +320,16 @@ const SolarSystem = () => {
           </div>
         );
       })}
+
+      {/* 4. Real-Time 3D Earth Fullscreen Modal (Triggered by clicking central 'H' Singularity Core or 'earth' command) */}
+      {isEarthModalOpen && (
+        <Suspense fallback={null}>
+          <RealTimeEarthModal
+            isOpen={isEarthModalOpen}
+            onClose={() => setIsEarthModalOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
