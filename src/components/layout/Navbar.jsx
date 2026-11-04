@@ -7,9 +7,12 @@ import {
   FaExternalLinkAlt,
   FaBars,
   FaTimes,
+  FaVolumeMute,
+  FaVolumeUp,
 } from "react-icons/fa";
 import { SiHuggingface } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
+import { toggleAudioMute, getIsAudioMuted } from "@/utils/audio";
 
 const NAV_LINKS = [
   { name: "About", href: "/#about" },
@@ -21,6 +24,7 @@ const NAV_LINKS = [
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(getIsAudioMuted());
   const location = useLocation();
 
   // Detect scroll to adjust glass transparency
@@ -101,6 +105,22 @@ const Navbar = () => {
 
         {/* Right: Glassmorphic Social Badges & Terminal Trigger (Desktop) */}
         <div className="hidden sm:flex items-center gap-2">
+          {/* Audio Synthesizer Toggle */}
+          <button
+            onClick={() => {
+              const muted = toggleAudioMute();
+              setIsMuted(muted);
+            }}
+            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm cursor-pointer"
+            title={isMuted ? "Unmute Cyber Audio Effects" : "Mute Audio Effects"}
+          >
+            {isMuted ? (
+              <FaVolumeMute className="text-sm text-gray-400" />
+            ) : (
+              <FaVolumeUp className="text-sm text-cyan-300 animate-pulse" />
+            )}
+          </button>
+
           <button
             onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all hover:scale-105 cursor-pointer shadow-sm"
