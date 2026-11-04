@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import HoloCore3D from "./HoloCore3D";
 import {
   SiCplusplus,
   SiPython,
@@ -68,6 +69,7 @@ const PLANETS = [
 const SolarSystem = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isCoreHovered, setIsCoreHovered] = useState(false);
   const [dimensions, setDimensions] = useState({
     rx: 175,
     ry: 78,
@@ -228,13 +230,22 @@ const SolarSystem = () => {
           style={{ animation: "spin 16s linear infinite reverse" }}
         />
 
-        {/* Master Core Orb (Deep Obsidian Cosmic Glass with Inset Bloom) */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#0c1427]/95 via-[#080d1a]/98 to-[#02050e]/95 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30">
+        {/* Master Core Orb (Deep Obsidian Cosmic Glass with Inset Bloom & Real 3D Three.js Lattice) */}
+        <div
+          className="w-22 h-22 sm:w-26 sm:h-26 rounded-full bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30 overflow-visible"
+          onMouseEnter={() => setIsCoreHovered(true)}
+          onMouseLeave={() => setIsCoreHovered(false)}
+        >
+          {/* Real 3D Three.js Holographic Wireframe Core (Icosahedron + Octahedron + Precessing Ring) */}
+          <div className="absolute inset-[-14px] pointer-events-none z-10">
+            <HoloCore3D isHovered={isCoreHovered} />
+          </div>
+
           {/* Inner Glowing Reticle */}
-          <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none" />
+          <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none z-0" />
 
           {/* Pure Laser-Cut Metallic "H" Monogram (Clean, Bold, Zero Text Labels) */}
-          <span className="text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none">
+          <span className="relative z-20 text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none pointer-events-none">
             H
           </span>
         </div>

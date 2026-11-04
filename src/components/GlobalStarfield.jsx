@@ -1,40 +1,113 @@
+import React, { useRef, useEffect, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
-import { useRef, Suspense } from "react";
 import * as random from "maath/random";
 
-const MAX_STARS = 10000;
-const ADD_INTERVAL = 0.5; // seconds between each star burst
-const ADD_AMOUNT = 200; // stars to add each burst
+const TOTAL_DISTANT_STARS = 7000;
+const TOTAL_CYAN_SPARKS = 1200;
+const TOTAL_AMBER_SPARKS = 500;
 
-const StarBackground = () => {
-  const ref = useRef();
-  const timeRef = useRef(0);
+/**
+ * 3D Deep Space Starfield with Interactive Mouse Gravity & Parallax
+ * Directly inspired by Three.js particle wave & interactive points architectures.
+ */
+const StarFieldMesh = () => {
+  const distantRef = useRef();
+  const cyanRef = useRef();
+  const amberRef = useRef();
 
-  // Create large static buffer once
-  const stars = useRef(
-    random.inSphere(new Float32Array(MAX_STARS * 3), { radius: 1.2 })
+  // Mouse tracker with smooth lerp damping
+  const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
+
+  // Generate sphere particle coordinates once
+  const distantPositions = useRef(
+    random.inSphere(new Float32Array(TOTAL_DISTANT_STARS * 3), { radius: 1.25 })
+  );
+  const cyanPositions = useRef(
+    random.inSphere(new Float32Array(TOTAL_CYAN_SPARKS * 3), { radius: 1.1 })
+  );
+  const amberPositions = useRef(
+    random.inSphere(new Float32Array(TOTAL_AMBER_SPARKS * 3), { radius: 0.95 })
   );
 
+  useEffect(() => {
+    const handlePointerMove = (e) => {
+      // Normalize mouse coordinates from -1 to 1 across entire viewport
+      mouseRef.current.targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseRef.current.targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    return () => window.removeEventListener("pointermove", handlePointerMove);
+  }, []);
+
   useFrame((_state, delta) => {
-    if (ref.current) {
-      ref.current.rotation.x -= delta / 10;
-      ref.current.rotation.y -= delta / 15;
+    const m = mouseRef.current;
+    // Smooth inertial spring damping (lerp factor 0.05)
+    m.x += (m.targetX - m.x) * 0.05;
+    m.y += (m.targetY - m.y) * 0.05;
+
+    // 1. Distant Starfield: Slow background drift + subtle parallax tilt
+    if (distantRef.current) {
+      distantRef.current.rotation.x -= delta / 22;
+      distantRef.current.rotation.y -= delta / 30;
+      // Parallax warp
+      distantRef.current.position.x = m.x * 0.06;
+      distantRef.current.position.y = -m.y * 0.06;
     }
 
-    // Remove this burst logic — not needed if we prefill all
-    timeRef.current += delta;
+    // 2. Cyan Cosmic Sparks: Counter-rotation + higher sensitivity
+    if (cyanRef.current) {
+      cyanRef.current.rotation.x += delta / 18;
+      cyanRef.current.rotation.y += delta / 24;
+      cyanRef.current.position.x = m.x * 0.12;
+      cyanRef.current.position.y = -m.y * 0.12;
+    }
+
+    // 3. Solar Amber Sparks: Gyroscopic orbital harmonic drift
+    if (amberRef.current) {
+      amberRef.current.rotation.x -= delta / 15;
+      amberRef.current.rotation.y += delta / 20;
+      amberRef.current.position.x = -m.x * 0.08;
+      amberRef.current.position.y = m.y * 0.08;
+    }
   });
 
   return (
     <group rotation={[0, 0, Math.PI / 4]}>
-      <Points ref={ref} stride={3} positions={stars.current} frustumCulled>
+      {/* 1. Deep Celestial White Stars */}
+      <Points ref={distantRef} stride={3} positions={distantPositions.current} frustumCulled>
         <PointMaterial
           transparent
           color="#ffffff"
-          size={0.002}
+          size={0.0018}
           sizeAttenuation
           depthWrite={false}
+          opacity={0.8}
+        />
+      </Points>
+
+      {/* 2. Electric Cyan Cosmic Sparks */}
+      <Points ref={cyanRef} stride={3} positions={cyanPositions.current} frustumCulled>
+        <PointMaterial
+          transparent
+          color="#00f0ff"
+          size={0.0032}
+          sizeAttenuation
+          depthWrite={false}
+          opacity={0.85}
+        />
+      </Points>
+
+      {/* 3. Solar Amber Harmonic Sparks */}
+      <Points ref={amberRef} stride={3} positions={amberPositions.current} frustumCulled>
+        <PointMaterial
+          transparent
+          color="#facc15"
+          size={0.0028}
+          sizeAttenuation
+          depthWrite={false}
+          opacity={0.75}
         />
       </Points>
     </group>
@@ -45,15 +118,17 @@ export const StarsCanvas = () => (
   <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none">
     <Canvas
       camera={{ position: [0, 0, 1] }}
-      gl={{ preserveDrawingBuffer: true }}
+      gl={{ preserveDrawingBuffer: true, antialias: true }}
       onCreated={({ gl }) => {
-        gl.setClearColor('#000000', 0);
+        gl.setClearColor("#000000", 0);
       }}
-      style={{ background: 'transparent' }}
+      style={{ background: "transparent" }}
     >
       <Suspense fallback={null}>
-        <StarBackground />
+        <StarFieldMesh />
       </Suspense>
     </Canvas>
   </div>
 );
+
+export default StarsCanvas;
