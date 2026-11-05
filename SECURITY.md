@@ -4,7 +4,7 @@
 
 Security and privacy are taken seriously in this project. If you discover a vulnerability or security flaw, please report it privately:
 
-- **Email**: [hkg77177@gmail.com](mailto:hkg77177@gmail.com)
+- **Email**: [h7@gmail.com](mailto:h7@gmail.com)
 - **Response Time**: Usually within 24–48 hours.
 
 Please do not open public GitHub issues for security vulnerabilities until they have been reviewed and mitigated.
