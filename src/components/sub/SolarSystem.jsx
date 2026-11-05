@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import HoloCore3D from "./HoloCore3D";
+import { playWarpSound, playCyberBlip } from "@/utils/audio";
 
-// Lazy load 3D Earth modal for optimal initial performance
-const RealTimeEarthModal = lazy(() => import("./RealTimeEarthModal"));
+// Lazy load 3D Real-Time Earth core for optimal performance
+const RealTimeEarthCore = lazy(() => import("./RealTimeEarthCore"));
+
 import {
   SiCplusplus,
   SiPython,
@@ -73,13 +76,36 @@ const SolarSystem = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isCoreHovered, setIsCoreHovered] = useState(false);
-  const [isEarthModalOpen, setIsEarthModalOpen] = useState(false);
+  const [isEarthActive, setIsEarthActive] = useState(false);
 
   useEffect(() => {
-    const handleOpenEarth = () => setIsEarthModalOpen(true);
-    window.addEventListener("open-earth-modal", handleOpenEarth);
-    return () => window.removeEventListener("open-earth-modal", handleOpenEarth);
+    const handleToggleEarth = (e) => {
+      if (e.detail && typeof e.detail.active === "boolean") {
+        setIsEarthActive(e.detail.active);
+      } else {
+        setIsEarthActive((prev) => !prev);
+      }
+    };
+    window.addEventListener("toggle-earth-core", handleToggleEarth);
+    window.addEventListener("open-earth-modal", handleToggleEarth);
+    return () => {
+      window.removeEventListener("toggle-earth-core", handleToggleEarth);
+      window.removeEventListener("open-earth-modal", handleToggleEarth);
+    };
   }, []);
+
+  const handleToggleCore = () => {
+    setIsEarthActive((prev) => {
+      const next = !prev;
+      if (next) {
+        playWarpSound();
+      } else {
+        playCyberBlip(540, 0.04);
+      }
+      return next;
+    });
+  };
+
   const [dimensions, setDimensions] = useState({
     rx: 175,
     ry: 78,
@@ -143,8 +169,8 @@ const SolarSystem = () => {
         const y = x0 * sinTilt + y0 * cosTilt;
 
         // Depth: sin(planetAngle)
-        // > 0 means coming towards viewer (in front of Sun)
-        // < 0 means moving away (behind Sun)
+        // > 0 means coming towards viewer (in front of Sun / Earth)
+        // < 0 means moving away (behind Sun / Earth)
         const depth = Math.sin(planetAngle);
 
         let zIndex = 20;
@@ -152,14 +178,14 @@ const SolarSystem = () => {
         let opacity = 1.0;
         let brightness = 1.0;
 
-        if (depth >= 0) {
-          // Front hemisphere: pass in front of Sun disc (z-30)
+        if (depth > 0) {
+          // Front hemisphere: pass in front of central core (z-30)
           zIndex = 30;
-          scale = 0.98 + 0.16 * depth; // 0.98 to 1.14
-          opacity = 0.92 + 0.08 * depth;
-          brightness = 1.0 + 0.08 * depth;
+          scale = 0.98 + 0.22 * depth; // 0.98 to 1.20
+          opacity = 0.90 + 0.10 * depth; // 0.90 to 1.0
+          brightness = 1.0 + 0.25 * depth;
         } else {
-          // Back hemisphere: pass behind Sun disc (z-10)
+          // Back hemisphere: pass behind central core (z-10)
           zIndex = 10;
           scale = 0.80 + 0.18 * (depth + 1); // 0.80 to 0.98
           opacity = 0.45 + 0.45 * (depth + 1); // 0.45 to 0.90
@@ -179,17 +205,9 @@ const SolarSystem = () => {
         return;
       }
       animFrameRef.current = requestAnimationFrame(animate);
-
-
-
-
     };
 
     animFrameRef.current = requestAnimationFrame(animate);
-
-
-
-
 
     let observer = null;
     if (typeof IntersectionObserver !== "undefined" && containerRef.current) {
@@ -224,7 +242,6 @@ const SolarSystem = () => {
         className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
         style={{
           transform: "rotate(-10deg)",
-          transformOrigin: "center center",
         }}
       >
         <defs>
@@ -259,42 +276,83 @@ const SolarSystem = () => {
         />
       </svg>
 
-      {/* 2. Central "H" Singularity Core (z-20) - Elevated Highest Level (No text labels) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-auto group">
+      {/* 2. Central Core (z-20) - Seamless In-Place Morph between "H" Sun and 3D Real-Time Earth */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-auto">
         {/* Deep Volumetric Atmospheric Corona Glow */}
-        <div className="absolute w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/20 blur-3xl animate-pulse pointer-events-none" />
+        <div
+          className={`absolute rounded-full blur-3xl transition-all duration-700 pointer-events-none ${
+            isEarthActive
+              ? "w-48 h-48 sm:w-60 sm:h-60 bg-gradient-to-r from-cyan-500/30 via-sky-500/25 to-blue-600/25 scale-105"
+              : "w-44 h-44 sm:w-56 sm:h-56 bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/20 animate-pulse"
+          }`}
+        />
 
         {/* Outer Orbiting Compass Radar Rings */}
-        <div className="absolute w-32 h-32 sm:w-38 sm:h-38 rounded-full border border-amber-400/30 border-dashed animate-spin-slow pointer-events-none" />
+        <div className="absolute w-32 h-32 sm:w-38 sm:h-38 rounded-full border border-amber-400/25 border-dashed animate-spin-slow pointer-events-none" />
         <div
           className="absolute w-26 h-26 sm:w-32 sm:h-32 rounded-full border border-cyan-400/25 pointer-events-none"
           style={{ animation: "spin 16s linear infinite reverse" }}
         />
 
-        {/* Master Core Orb (Deep Obsidian Cosmic Glass with Inset Bloom & Real 3D Three.js Lattice) */}
+        {/* Morphing Core Container: Clicking toggles between Holographic "H" Sun and 3D Real-Time Earth */}
         <div
-          onClick={() => setIsEarthModalOpen(true)}
-          title="Click Singularity to warp to Real-Time 3D Earth (NASA Day/Night)"
-          className="w-22 h-22 sm:w-26 sm:h-26 rounded-full bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] backdrop-blur-2xl flex items-center justify-center relative transition-transform duration-300 group-hover:scale-108 cursor-pointer ring-1 ring-amber-400/30 overflow-visible"
+          onClick={handleToggleCore}
           onMouseEnter={() => setIsCoreHovered(true)}
           onMouseLeave={() => setIsCoreHovered(false)}
+          className={`relative rounded-full flex items-center justify-center transition-all duration-500 cursor-pointer overflow-visible ${
+            isEarthActive
+              ? "w-26 h-26 sm:w-32 sm:h-32 shadow-[0_0_50px_rgba(0,240,255,0.45)] ring-1 ring-cyan-400/40"
+              : "w-22 h-22 sm:w-26 sm:h-26 bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] ring-1 ring-amber-400/30 hover:scale-108 backdrop-blur-2xl"
+          }`}
         >
-          {/* Real 3D Three.js Holographic Wireframe Core (Icosahedron + Octahedron + Precessing Ring) */}
-          <div className="absolute inset-[-14px] pointer-events-none z-10">
-            <HoloCore3D isHovered={isCoreHovered} />
-          </div>
+          <AnimatePresence mode="wait">
+            {!isEarthActive ? (
+              <motion.div
+                key="h-sun"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="w-full h-full flex items-center justify-center relative"
+              >
+                {/* 3D Holographic Wireframe Core (Icosahedron + Octahedron + Ring) */}
+                <div className="absolute inset-[-14px] pointer-events-none z-10">
+                  <HoloCore3D isHovered={isCoreHovered} />
+                </div>
 
-          {/* Inner Glowing Reticle */}
-          <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none z-0" />
+                {/* Inner Glowing Reticle */}
+                <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none z-0" />
 
-          {/* Pure Laser-Cut Metallic "H" Monogram (Clean, Bold, Zero Text Labels) */}
-          <span className="relative z-20 text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none pointer-events-none">
-            H
-          </span>
+                {/* Pure Laser-Cut Metallic "H" Monogram */}
+                <span className="relative z-20 text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none pointer-events-none">
+                  H
+                </span>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="earth-globe"
+                initial={{ opacity: 0, scale: 0.75 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.75 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="w-full h-full relative flex items-center justify-center"
+              >
+                <Suspense
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+                    </div>
+                  }
+                >
+                  <RealTimeEarthCore isHovered={isCoreHovered} />
+                </Suspense>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      {/* 3. Orbiting Planetary Nodes (Direct DOM 3D Billboarding - Highest Level Modules) */}
+      {/* 3. Orbiting Planetary Nodes (Direct DOM 3D Billboarding around the Central Core) */}
       {PLANETS.map((planet, idx) => {
         const IconComponent = planet.icon;
         const isHovered = hoveredIndex === idx;
@@ -351,16 +409,6 @@ const SolarSystem = () => {
           </div>
         );
       })}
-
-      {/* 4. Real-Time 3D Earth Fullscreen Modal (Triggered by clicking central 'H' Singularity Core or 'earth' command) */}
-      {isEarthModalOpen && (
-        <Suspense fallback={null}>
-          <RealTimeEarthModal
-            isOpen={isEarthModalOpen}
-            onClose={() => setIsEarthModalOpen(false)}
-          />
-        </Suspense>
-      )}
     </div>
   );
 };

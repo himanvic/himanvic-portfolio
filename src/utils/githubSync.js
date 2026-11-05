@@ -131,17 +131,28 @@ export function formatRepoForCard(repo) {
 
   const safeLink = isValidHttpsUrl(repo.homepage) ? repo.homepage.trim() : repo.html_url;
 
+  // Strictly sanitize external strings from GitHub API to prevent injection or malformed Unicode
+  const sanitizeSafeText = (str, maxLen = 300) => {
+    if (!str || typeof str !== "string") return "";
+    return str
+      .slice(0, maxLen)
+      .replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "")
+      .trim();
+  };
+
+  const rawDescription =
+    repo.description ||
+    DEFAULT_DESCRIPTIONS[cleanNameLower] ||
+    "Systems, algorithmic, and experimental software engineering repository on GitHub.";
+
   return {
     id: `gh-${repo.id}`,
-    name: repo.name,
-    description:
-      repo.description ||
-      DEFAULT_DESCRIPTIONS[cleanNameLower] ||
-      "Systems, algorithmic, and experimental software engineering repository on GitHub.",
+    name: sanitizeSafeText(repo.name, 60),
+    description: sanitizeSafeText(rawDescription, 280),
     tech: topics.length > 0 ? topics : [language, "GitHub"],
     link: safeLink,
     image: localImage || fallbackImage,
-    stars: repo.stargazers_count || 0,
+    stars: Number.isFinite(repo.stargazers_count) ? repo.stargazers_count : 0,
     isFeatured: (repo.topics || []).includes("featured"),
     language,
     accent: language === "C++" ? "#38bdf8" : language === "Python" ? "#facc15" : "#00f0ff",
