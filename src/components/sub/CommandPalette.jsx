@@ -1,7 +1,7 @@
 // File Name: CommandPalette.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaTerminal, FaTimes, FaRocket, FaCode, FaGlobeAmericas } from "react-icons/fa";
+import { FaTerminal, FaTimes, FaRocket, FaCode } from "react-icons/fa";
 import { playCyberBlip } from "@/utils/audio";
 
 const triggerHyperspaceWarp = () => {
@@ -11,7 +11,6 @@ const triggerHyperspaceWarp = () => {
 };
 
 const HELP_COMMANDS = [
-  { cmd: "earth", desc: "Warp to real-time 3D Earth (NASA Day/Night)" },
   { cmd: "algo", desc: "Open interactive live algorithm visualizer" },
   { cmd: "warp", desc: "Engage Three.js hyperspace warp speed" },
   { cmd: "c++", desc: "Display C++ systems architecture profile" },
@@ -64,13 +63,14 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
   }, [logs, isOpen]);
 
   const executeCommand = (rawCmd) => {
+    // Sanitize and cap length to prevent prompt/buffer abuse
     const cleanRaw = String(rawCmd || "").slice(0, 80);
     const cmd = cleanRaw.trim().toLowerCase();
     if (!cmd) return;
 
     playCyberBlip(780, 0.035);
 
-    const userEntry = { type: "user", text: `> ${rawCmd}` };
+    const userEntry = { type: "user", text: `> ${cleanRaw.trim()}` };
     const newLogs = [...logs, userEntry];
 
     switch (cmd) {
@@ -81,16 +81,34 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
         });
         break;
 
+      // Secret developer easter-egg commands: morph central solar core
       case "earth":
       case "globe":
       case "world":
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("open-earth-modal"));
+          window.dispatchEvent(new CustomEvent("toggle-earth-core", { detail: { active: true } }));
+          const hero = document.getElementById("hero") || document.querySelector("section");
+          if (hero) hero.scrollIntoView({ behavior: "smooth" });
         }
         setIsOpen(false);
         newLogs.push({
           type: "success",
-          text: "🌍 Warping to real-time 3D Earth with NASA day/night terminator...",
+          text: "🌍 Morphing central core...",
+        });
+        break;
+
+      case "sun":
+      case "core":
+      case "singularity":
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("toggle-earth-core", { detail: { active: false } }));
+          const hero = document.getElementById("hero") || document.querySelector("section");
+          if (hero) hero.scrollIntoView({ behavior: "smooth" });
+        }
+        setIsOpen(false);
+        newLogs.push({
+          type: "success",
+          text: "✨ Returning central core...",
         });
         break;
 
@@ -175,7 +193,7 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
       default:
         newLogs.push({
           type: "error",
-          text: `Command not found: '${rawCmd}'. Type 'help' for available commands.`,
+          text: `Command not found: '${cmd}'. Type 'help' for available commands.`,
         });
     }
 
@@ -214,14 +232,16 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-2xl bg-[#060a17]/98 border border-cyan-500/40 rounded-3xl shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[85vh] cursor-default"
           >
-            {/* Terminal Window Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/20 bg-black/50 select-none">
+            {/* Terminal Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 bg-black/40 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-red-500/80" />
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <span className="w-3 h-3 rounded-full bg-green-500/80" />
-                <span className="font-mono text-xs text-cyan-300 font-bold ml-2">
-                  himanvic.sys | cyber_terminal v2.4
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                </div>
+                <span className="text-xs font-mono text-cyan-300 font-bold ml-2">
+                  himanvic@quantum-os:~
                 </span>
               </div>
 
@@ -239,13 +259,6 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
             {/* Quick Action Pills for One-Click Execution (Mobile & Desktop Friendly) */}
             <div className="flex items-center gap-1.5 p-3 bg-black/30 border-b border-white/5 overflow-x-auto scrollbar-none text-[11px] font-mono">
               <span className="text-gray-500 mr-1 hidden sm:inline">Quick:</span>
-              <button
-                onClick={() => executeCommand("earth")}
-                className="px-2.5 py-1 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
-              >
-                <FaGlobeAmericas className="text-[9px]" />
-                <span>earth</span>
-              </button>
               <button
                 onClick={() => executeCommand("warp")}
                 className="px-2.5 py-1 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
