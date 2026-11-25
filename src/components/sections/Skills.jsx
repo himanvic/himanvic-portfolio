@@ -7,13 +7,15 @@ import {
   SiLinux,
 } from "react-icons/si";
 import { VscCode } from "react-icons/vsc";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
 const Skills = () => {
   const videoRef = useRef(null);
+  const { allowBackgroundVideo } = useDeviceCapabilities();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !allowBackgroundVideo) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -28,20 +30,18 @@ const Skills = () => {
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, []);
+  }, [allowBackgroundVideo]);
 
   return (
     <section
       id="skills"
       className="relative w-full py-24 sm:py-32 md:py-40 overflow-hidden flex flex-col items-center justify-center z-10"
     >
-      {/* Background ambient lighting (zero-blur CSS radial gradient) */}
       <div
         className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)" }}
       />
 
-      {/* Text Content */}
       <div className="relative z-20 text-center px-4 sm:px-6 max-w-5xl w-full flex flex-col items-center">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-3 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono tracking-widest uppercase backdrop-blur-md shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -56,9 +56,7 @@ const Skills = () => {
           Currently exploring and strengthening fundamentals in <span className="text-cyan-400 font-semibold">C++</span> and <span className="text-amber-400 font-semibold">Python</span>, learning through hands-on experimentation.
         </p>
 
-        {/* Primary Languages Showcase */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl w-full mx-auto mb-12">
-          {/* C++ Card */}
           <div className="bg-[#090d1f]/85 border border-cyan-500/30 rounded-2xl p-6 backdrop-blur-xl hover:border-cyan-400/60 transition-all hover:scale-[1.02] flex items-center gap-5 text-left shadow-lg group">
             <div className="p-4 bg-cyan-500/10 border border-cyan-400/30 rounded-xl text-cyan-400 text-5xl group-hover:scale-110 transition-transform">
               <SiCplusplus />
@@ -74,7 +72,6 @@ const Skills = () => {
             </div>
           </div>
 
-          {/* Python Card */}
           <div className="bg-[#090d1f]/85 border border-amber-500/30 rounded-2xl p-6 backdrop-blur-xl hover:border-amber-400/60 transition-all hover:scale-[1.02] flex items-center gap-5 text-left shadow-lg group">
             <div className="p-4 bg-amber-500/10 border border-amber-400/30 rounded-xl text-amber-400 text-5xl group-hover:scale-110 transition-transform">
               <SiPython />
@@ -91,7 +88,6 @@ const Skills = () => {
           </div>
         </div>
 
-        {/* Developer Workflow & Tools */}
         <div className="max-w-2xl mx-auto w-full">
           <p className="text-xs uppercase tracking-wider text-cyan-400/80 mb-4 font-mono font-semibold">
             Development Environment &amp; Workflow
@@ -117,7 +113,7 @@ const Skills = () => {
         </div>
       </div>
 
-      {/* Cybernetic Background Wormhole Video (Pauses automatically when off-screen) */}
+      {/* Cybernetic Background Wormhole Video on Desktop; lightweight radial fallback on Mobile/Lite */}
       <div
         className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden"
         style={{
@@ -125,19 +121,30 @@ const Skills = () => {
           WebkitMaskImage: "radial-gradient(ellipse 75% 70% at 50% 50%, black 25%, transparent 85%)",
         }}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-45"
-          style={{
-            filter: "hue-rotate(285deg) saturate(1.35) brightness(1.15)",
-          }}
-        >
-          <source src="/assets/videos/skills.webm" type="video/webm" />
-        </video>
+        {allowBackgroundVideo ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+            className="w-full h-full object-cover opacity-45"
+            style={{
+              filter: "hue-rotate(285deg) saturate(1.35) brightness(1.15)",
+            }}
+          >
+            <source src="/assets/videos/skills.webm" type="video/webm" />
+          </video>
+        ) : (
+          <div
+            className="w-full h-full opacity-60"
+            style={{
+              background:
+                "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(6,182,212,0.14) 0%, rgba(14,116,144,0.06) 45%, transparent 75%)",
+            }}
+          />
+        )}
       </div>
     </section>
   );

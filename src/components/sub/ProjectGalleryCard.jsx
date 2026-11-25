@@ -2,19 +2,21 @@
 import React, { useState, useRef } from "react";
 import { SiCplusplus, SiPython } from "react-icons/si";
 import { FaGithub, FaStar, FaExternalLinkAlt } from "react-icons/fa";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
 const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => {
   const [imgError, setImgError] = useState(!image);
   const cardRef = useRef(null);
   const glareRef = useRef(null);
+  const { isCoarsePointer, prefersReducedMotion } = useDeviceCapabilities();
 
   const isGithub = link && link.includes("github.com");
   const hasCpp = tech?.some((t) => t.toLowerCase().includes("c++") || t.toLowerCase() === "cpp");
   const hasPython = tech?.some((t) => t.toLowerCase().includes("python"));
 
-  // Direct DOM tilt & specular sheen updates (zero React re-renders per mouse move)
+  // Direct DOM tilt & specular sheen updates (disabled on touch screens / reduced-motion)
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
+    if (isCoarsePointer || prefersReducedMotion || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;

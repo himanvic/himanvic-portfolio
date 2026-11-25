@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import HoloCore3D from "./HoloCore3D";
 import { playWarpSound, playCyberBlip } from "@/utils/audio";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
-// Lazy load 3D Real-Time Earth core for optimal initial load performance
+// Defer heavy Three.js cores so initial hero text & CTA paint immediately
+const HoloCore3D = lazy(() => import("./HoloCore3D"));
 const RealTimeEarthCore = lazy(() => import("./RealTimeEarthCore"));
 
 import {
@@ -127,9 +128,12 @@ const SolarSystem = () => {
     }
   };
 
-  const [dimensions, setDimensions] = useState({
-    rx: 175,
-    ry: 78,
+  const { prefersReducedMotion, isCoarsePointer } = useDeviceCapabilities();
+  const [dimensions, setDimensions] = useState(() => {
+    const w = typeof window !== "undefined" ? window.innerWidth : 1024;
+    if (w < 380) return { rx: 108, ry: 48 };
+    if (w < 640) return { rx: 125, ry: 56 };
+    return { rx: 175, ry: 78 };
   });
 
   const containerRef = useRef(null);
@@ -141,19 +145,18 @@ const SolarSystem = () => {
 
   useEffect(() => {
     const updateDimensions = () => {
-      const isMobile = window.innerWidth < 640;
-      setDimensions({
-        rx: isMobile ? 125 : 175,
-        ry: isMobile ? 56 : 78,
-      });
+      const w = window.innerWidth;
+      if (w < 380) setDimensions({ rx: 108, ry: 48 });
+      else if (w < 640) setDimensions({ rx: 125, ry: 56 });
+      else setDimensions({ rx: 175, ry: 78 });
     };
 
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
+    window.addEventListener("resize", updateDimensions, { passive: true });
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // 60-120fps direct DOM orbital loop (never resets on hover)
+  // 60-120fps direct DOM orbital loop (honors prefers-reduced-motion)
   useEffect(() => {
     const tiltRad = (-10 * Math.PI) / 180;
     const cosTilt = Math.cos(tiltRad);
@@ -161,13 +164,7 @@ const SolarSystem = () => {
     const orbitDuration = 22;
     const baseSpeed = (2 * Math.PI) / orbitDuration;
 
-    const animate = (now) => {
-      const dt = Math.min((now - lastTimeRef.current) / 1000, 0.1);
-      lastTimeRef.current = now;
-
-      const speedMultiplier = isPausedRef.current ? 0.2 : 1.0;
-      angleRef.current = (angleRef.current + baseSpeed * speedMultiplier * dt) % (2 * Math.PI);
-
+    const positionPlanets = () => {
       const { rx, ry } = dimensions;
       const count = PLANETS.length;
 
@@ -204,6 +201,21 @@ const SolarSystem = () => {
         el.style.zIndex = zIndex;
         el.style.opacity = opacity.toFixed(3);
       }
+    };
+
+    if (prefersReducedMotion) {
+      positionPlanets();
+      return undefined;
+    }
+
+    const animate = (now) => {
+      const dt = Math.min((now - lastTimeRef.current) / 1000, 0.1);
+      lastTimeRef.current = now;
+
+      const speedMultiplier = isPausedRef.current ? 0.2 : 1.0;
+      angleRef.current = (angleRef.current + baseSpeed * speedMultiplier * dt) % (2 * Math.PI);
+
+      positionPlanets();
 
       if (!isVisibleRef.current || document.hidden) {
         animFrameRef.current = null;
@@ -244,14 +256,14 @@ const SolarSystem = () => {
       observer?.disconnect();
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [dimensions]);
+  }, [dimensions, prefersReducedMotion]);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-[310px] h-[250px] sm:w-[410px] sm:h-[280px] flex items-center justify-center select-none"
+      className="relative w-[min(310px,92vw)] h-[240px] sm:w-[410px] sm:h-[280px] flex items-center justify-center select-none"
       onMouseEnter={() => {
-        isPausedRef.current = true;
+        if (!isCoarsePointer) isPausedRef.current = true;
       }}
       onMouseLeave={() => {
         isPausedRef.current = false;
@@ -334,7 +346,9 @@ const SolarSystem = () => {
                 className="w-full h-full flex items-center justify-center relative"
               >
                 <div className="absolute inset-[-14px] pointer-events-none z-10">
-                  <HoloCore3D isHovered={isCoreHovered} />
+                  <Suspense fallback={null}>
+                    <HoloCore3D isHovered={isCoreHovered} />
+                  </Suspense>
                 </div>
 
                 <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none z-0" />
@@ -379,6 +393,11 @@ const SolarSystem = () => {
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform cursor-pointer"
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
+            onClick={() => {
+              if (isCoarsePointer) {
+                setHoveredIndex((prev) => (prev === idx ? null : idx));
+              }
+            }}
           >
             <div className="relative group flex flex-col items-center">
               <div

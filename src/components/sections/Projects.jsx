@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { PROJECTS } from "@/constants/projectsData";
 import { fetchGitHubRepos, formatRepoForCard } from "@/utils/githubSync";
 import { Link } from "react-router-dom";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 import {
   FaChevronLeft,
   FaChevronRight,
@@ -13,6 +14,7 @@ import {
 } from "react-icons/fa";
 
 const Projects = () => {
+  const { prefersReducedMotion } = useDeviceCapabilities();
   const [projectList, setProjectList] = useState(PROJECTS);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
@@ -99,12 +101,12 @@ const Projects = () => {
 
   // Auto-revolve timer pauses cleanly when hovered or scrolled out of view
   useEffect(() => {
-    if (!isAutoPlay || isHovered || !isInView) return;
+    if (!isAutoPlay || isHovered || !isInView || prefersReducedMotion) return;
     const interval = setInterval(() => {
       nextProject();
     }, 4500);
     return () => clearInterval(interval);
-  }, [isAutoPlay, isHovered, isInView, nextProject]);
+  }, [isAutoPlay, isHovered, isInView, prefersReducedMotion, nextProject]);
 
   const handleTouchStart = (e) => {
     touchStartXRef.current = e.touches[0].clientX;

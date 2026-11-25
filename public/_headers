@@ -1,6 +1,8 @@
 # Cloudflare Pages Custom Security & Performance Headers
-# Applied globally to all routes
+# Enforced silently at edge without HTML metadata leaks
+
 /*
+  Cache-Control: no-cache, must-revalidate
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
@@ -9,8 +11,21 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://opengraph.githubassets.com https://avatars.githubusercontent.com; media-src 'self' blob:; connect-src 'self' https://api.github.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests;
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://opengraph.githubassets.com https://avatars.githubusercontent.com; media-src 'self'; connect-src 'self' https://api.github.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests;
 
-# Static hashed assets (JS, CSS, images, videos) - Cache for 1 year
-/assets/*
+# Content-hashed Vite JS/CSS bundles - Immutable 1 year cache for instant reload
+/assets/*.js
   Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Unhashed media & WebGL textures - Fast repeat load with stale-while-revalidate
+/assets/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/assets/videos/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/assets/textures/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
