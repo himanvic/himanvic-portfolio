@@ -9,6 +9,7 @@ import {
   FaTimes,
   FaVolumeMute,
   FaVolumeUp,
+  FaSearch,
 } from "react-icons/fa";
 import { SiHuggingface } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
@@ -140,11 +141,11 @@ const Navbar = () => {
           </button>
 
           <button
-            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
+            onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/60 hover:bg-cyan-900/70 border border-cyan-500/35 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all hover:scale-105 cursor-pointer"
-            title="Open Terminal (Ctrl + K)"
+            title="Command Palette (Ctrl + K)"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <FaSearch className="text-[10px] text-cyan-400" />
             <span className="font-bold">Ctrl K</span>
           </button>
 
