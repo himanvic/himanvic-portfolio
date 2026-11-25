@@ -1,7 +1,8 @@
 // File Name: AlgorithmVisualizer.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { FaPlay, FaRedo, FaTimes, FaCode, FaCheck } from "react-icons/fa";
+import { FaPlay, FaRedo, FaTimes, FaCode } from "react-icons/fa";
 import { SiCplusplus, SiPython } from "react-icons/si";
+import { playCyberBlip, playSuccessSound } from "@/utils/audio";
 
 const INITIAL_ARRAY_SIZE = 22;
 
@@ -135,6 +136,7 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
           arr[j + 1] = temp;
           setArray([...arr]);
           setStats({ comparisons, swaps });
+          playCyberBlip(320 + arr[j] * 5, 0.025);
           await sleep(45);
         } else {
           await sleep(25);
@@ -142,10 +144,12 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
       }
     }
 
+    if (!isSortingRef.current) return;
     setActiveIndices([]);
     setIsSorting(false);
     setIsCompleted(true);
     isSortingRef.current = false;
+    playSuccessSound();
   };
 
   // QuickSort visual execution
@@ -175,10 +179,12 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
           arr[j] = temp;
           setArray([...arr]);
           setStats({ comparisons, swaps });
+          playCyberBlip(320 + arr[i] * 5, 0.025);
           await sleep(35);
         }
       }
 
+      if (!isSortingRef.current) return -1;
       swaps++;
       const temp = arr[i + 1];
       arr[i + 1] = arr[high];
@@ -200,10 +206,12 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
     };
 
     await qs(0, arr.length - 1);
+    if (!isSortingRef.current) return;
     setActiveIndices([]);
     setIsSorting(false);
     setIsCompleted(true);
     isSortingRef.current = false;
+    playSuccessSound();
   };
 
   const handleStartSort = () => {

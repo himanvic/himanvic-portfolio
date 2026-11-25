@@ -15,10 +15,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toggleAudioMute, getIsAudioMuted } from "@/utils/audio";
 
 const NAV_LINKS = [
-  { name: "About", href: "/#about" },
-  { name: "Skills", href: "/#skills" },
-  { name: "Projects", href: "/#projects" },
-  { name: "Journey", href: "/#profile" },
+  { name: "About", href: "/#about", id: "about" },
+  { name: "Skills", href: "/#skills", id: "skills" },
+  { name: "Projects", href: "/#projects", id: "projects" },
+  { name: "Journey", href: "/#profile", id: "profile" },
 ];
 
 const Navbar = () => {
@@ -27,23 +27,40 @@ const Navbar = () => {
   const [isMuted, setIsMuted] = useState(getIsAudioMuted());
   const location = useLocation();
 
-  // Detect scroll to adjust glass transparency
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+
+  const handleSectionClick = (e, id) => {
+    setIsMobileMenuOpen(false);
+    if (location.pathname === "/") {
+      const target = document.getElementById(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth" });
+        window.history.replaceState(null, "", `/#${id}`);
+      }
+    }
+  };
+
+  const handleBrandClick = (e) => {
+    setIsMobileMenuOpen(false);
+    if (location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (location.hash) {
+        window.history.replaceState(null, "", "/");
+      }
+    }
+  };
 
   return (
     <header
@@ -57,6 +74,7 @@ const Navbar = () => {
         {/* Left: Brand Identity */}
         <Link
           to="/"
+          onClick={handleBrandClick}
           className="flex items-center gap-3 group cursor-pointer select-none"
         >
           <div className="relative">
@@ -78,12 +96,13 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Center: Truly Centered Floating Frosted Glass Dock (Desktop/Tablet) */}
+        {/* Center: Floating Frosted Glass Dock (Desktop/Tablet) */}
         <nav className="hidden md:flex items-center gap-1 bg-[#090d1f]/85 border border-cyan-500/25 rounded-full px-3 py-1.5 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.5)] absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.name}
               to={link.href}
+              onClick={(e) => handleSectionClick(e, link.id)}
               className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
             >
               {link.name}
@@ -95,7 +114,7 @@ const Navbar = () => {
           <a
             href="https://github.com/himanvic/himanvic-portfolio"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium text-cyan-300 hover:text-white hover:bg-cyan-900/40 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <span>Source</span>
@@ -103,16 +122,70 @@ const Navbar = () => {
           </a>
         </nav>
 
-        {/* Right: Glassmorphic Social Badges & Terminal Trigger (Desktop) */}
-        <div className="hidden sm:flex items-center gap-2">
-          {/* Audio Synthesizer Toggle */}
+        {/* Right: Dark Glassmorphic Capsule for Clear Contrast Over Bright Backdrop */}
+        <div className="hidden md:flex items-center gap-1.5 bg-[#090d1f]/80 border border-cyan-500/25 rounded-full px-2.5 py-1 backdrop-blur-xl shadow-[0_4px_25px_rgba(0,0,0,0.5)]">
           <button
             onClick={() => {
               const muted = toggleAudioMute();
               setIsMuted(muted);
             }}
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm cursor-pointer"
-            title={isMuted ? "Unmute Cyber Audio Effects" : "Mute Audio Effects"}
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+            title={isMuted ? "Unmute Audio Effects" : "Mute Audio Effects"}
+          >
+            {isMuted ? (
+              <FaVolumeMute className="text-xs text-gray-400" />
+            ) : (
+              <FaVolumeUp className="text-xs text-cyan-300 animate-pulse" />
+            )}
+          </button>
+
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/60 hover:bg-cyan-900/70 border border-cyan-500/35 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all hover:scale-105 cursor-pointer"
+            title="Open Terminal (Ctrl + K)"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="font-bold">Ctrl K</span>
+          </button>
+
+          <a
+            href="https://github.com/himanvic"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GitHub Profile"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-105"
+          >
+            <FaGithub className="text-sm" />
+          </a>
+          <a
+            href="https://x.com/Himanvic_dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Twitter / X"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-105"
+          >
+            <FaTwitter className="text-sm" />
+          </a>
+          <a
+            href="https://huggingface.co/himanvic"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Hugging Face"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 hover:bg-amber-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-105"
+          >
+            <SiHuggingface className="text-sm" />
+          </a>
+        </div>
+
+        {/* Mobile Controls (Audio + Hamburger) */}
+        <div className="md:hidden flex items-center gap-2">
+          <button
+            onClick={() => {
+              const muted = toggleAudioMute();
+              setIsMuted(muted);
+            }}
+            aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+            className="w-9 h-9 rounded-xl bg-[#090d1f]/80 border border-white/10 text-gray-300 flex items-center justify-center hover:border-cyan-400 transition-all cursor-pointer backdrop-blur-md"
           >
             {isMuted ? (
               <FaVolumeMute className="text-sm text-gray-400" />
@@ -122,55 +195,17 @@ const Navbar = () => {
           </button>
 
           <button
-            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }))}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono transition-all hover:scale-105 cursor-pointer shadow-sm"
-            title="Open Developer Terminal (Ctrl + K)"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle navigation menu"
+            className="w-9 h-9 rounded-xl bg-[#090d1f]/80 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-cyan-400 transition-all cursor-pointer backdrop-blur-md"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="font-bold">Ctrl K</span>
+            {isMobileMenuOpen ? (
+              <FaTimes className="text-base text-cyan-300" />
+            ) : (
+              <FaBars className="text-base text-gray-300" />
+            )}
           </button>
-
-          <a
-            href="https://github.com/himanvic"
-            target="_blank"
-            rel="noreferrer"
-            title="GitHub Profile"
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-          >
-            <FaGithub className="text-base" />
-          </a>
-          <a
-            href="https://x.com/Himanvic_dev"
-            target="_blank"
-            rel="noreferrer"
-            title="Twitter / X"
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400 hover:bg-cyan-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-          >
-            <FaTwitter className="text-base" />
-          </a>
-          <a
-            href="https://huggingface.co/himanvic"
-            target="_blank"
-            rel="noreferrer"
-            title="Hugging Face"
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 hover:bg-amber-900/30 text-gray-300 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-          >
-            <SiHuggingface className="text-base" />
-          </a>
         </div>
-
-        {/* Mobile Hamburger Toggle Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-          aria-label="Toggle navigation menu"
-          className="md:hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-cyan-400 transition-all cursor-pointer"
-        >
-          {isMobileMenuOpen ? (
-            <FaTimes className="text-base text-cyan-300" />
-          ) : (
-            <FaBars className="text-base text-gray-300" />
-          )}
-        </button>
       </div>
 
       {/* Mobile Animated Dropdown Menu */}
@@ -188,7 +223,7 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => handleSectionClick(e, link.id)}
                   className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-200 hover:text-white hover:bg-cyan-950/50 transition-colors flex items-center justify-between"
                 >
                   <span>{link.name}</span>
@@ -199,7 +234,7 @@ const Navbar = () => {
               <a
                 href="https://github.com/himanvic/himanvic-portfolio"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="px-4 py-2.5 rounded-xl text-sm font-medium text-cyan-300 hover:bg-cyan-950/50 transition-colors flex items-center justify-between"
               >
                 <span>Portfolio Source</span>
@@ -207,12 +242,11 @@ const Navbar = () => {
               </a>
             </div>
 
-            {/* Mobile Socials Row */}
             <div className="pt-3 border-t border-cyan-500/20 flex items-center justify-around">
               <a
                 href="https://github.com/himanvic"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white"
               >
                 <FaGithub /> GitHub
@@ -220,7 +254,7 @@ const Navbar = () => {
               <a
                 href="https://x.com/Himanvic_dev"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white"
               >
                 <FaTwitter /> Twitter / X
@@ -228,7 +262,7 @@ const Navbar = () => {
               <a
                 href="https://huggingface.co/himanvic"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white"
               >
                 <SiHuggingface /> HuggingFace

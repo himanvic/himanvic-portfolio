@@ -1,6 +1,6 @@
 // File Name: Projects.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { PROJECTS } from "@/constants/projectsData";
 import { fetchGitHubRepos, formatRepoForCard } from "@/utils/githubSync";
 import { Link } from "react-router-dom";
@@ -15,20 +15,30 @@ import {
 const Projects = () => {
   const [projectList, setProjectList] = useState(PROJECTS);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [, setDirection] = useState(1);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
+  const sectionRef = useRef(null);
   const touchStartXRef = useRef(0);
   const total = projectList.length;
 
-  // Responsive width tracking
   useEffect(() => {
     const handleResize = () => setViewportWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.05 }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Automatic sync with newly tagged "featured" GitHub repos
@@ -80,25 +90,22 @@ const Projects = () => {
   const isTablet = viewportWidth >= 640 && viewportWidth < 1024;
 
   const nextProject = useCallback(() => {
-    setDirection(1);
     setActiveIndex((prev) => (prev + 1) % total);
   }, [total]);
 
   const prevProject = useCallback(() => {
-    setDirection(-1);
     setActiveIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  // Auto-revolve timer with hover pause
+  // Auto-revolve timer pauses cleanly when hovered or scrolled out of view
   useEffect(() => {
-    if (!isAutoPlay || isHovered) return;
+    if (!isAutoPlay || isHovered || !isInView) return;
     const interval = setInterval(() => {
       nextProject();
     }, 4500);
     return () => clearInterval(interval);
-  }, [isAutoPlay, isHovered, nextProject]);
+  }, [isAutoPlay, isHovered, isInView, nextProject]);
 
-  // Touch gesture support for mobile devices
   const handleTouchStart = (e) => {
     touchStartXRef.current = e.touches[0].clientX;
   };
@@ -107,22 +114,16 @@ const Projects = () => {
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartXRef.current - touchEndX;
     if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        nextProject();
-      } else {
-        prevProject();
-      }
+      if (diff > 0) nextProject();
+      else prevProject();
     }
   };
 
   const getCardTransform = (index) => {
     let diff = index - activeIndex;
-
-    // Normalizing wrap-around for a circular carousel
     if (diff > total / 2) diff -= total;
     if (diff < -total / 2) diff += total;
 
-    // Center active card
     if (diff === 0) {
       return {
         x: 0,
@@ -133,14 +134,15 @@ const Projects = () => {
         opacity: 1,
         zIndex: 30,
         isCenter: true,
+        isVisible: true,
       };
     }
 
-    // Right card in orbit
+    const sideOffsetX = isMobile ? 135 : isTablet ? 280 : 400;
+
     if (diff === 1) {
-      const offsetX = isMobile ? 135 : isTablet ? 280 : 400;
       return {
-        x: offsetX,
+        x: sideOffsetX,
         y: 0,
         z: -120,
         scale: isMobile ? 0.78 : 0.85,
@@ -148,20 +150,35 @@ const Projects = () => {
         opacity: isMobile ? 0.35 : 0.65,
         zIndex: 10,
         isCenter: false,
+        isVisible: true,
       };
     }
 
-    // Left card in orbit (diff === -1)
-    const offsetX = isMobile ? -135 : isTablet ? -280 : -400;
+    if (diff === -1) {
+      return {
+        x: -sideOffsetX,
+        y: 0,
+        z: -120,
+        scale: isMobile ? 0.78 : 0.85,
+        rotateY: 26,
+        opacity: isMobile ? 0.35 : 0.65,
+        zIndex: 10,
+        isCenter: false,
+        isVisible: true,
+      };
+    }
+
+    // Cards further back hide cleanly instead of piling onto the left card slot
     return {
-      x: offsetX,
+      x: diff > 0 ? sideOffsetX * 1.15 : -sideOffsetX * 1.15,
       y: 0,
-      z: -120,
-      scale: isMobile ? 0.78 : 0.85,
-      rotateY: 26,
-      opacity: isMobile ? 0.35 : 0.65,
-      zIndex: 10,
+      z: -240,
+      scale: 0.7,
+      rotateY: diff > 0 ? -35 : 35,
+      opacity: 0,
+      zIndex: 0,
       isCenter: false,
+      isVisible: false,
     };
   };
 
@@ -169,22 +186,25 @@ const Projects = () => {
     if (index === activeIndex) {
       window.open(link, "_blank", "noopener,noreferrer");
     } else {
-      let diff = index - activeIndex;
-      if (diff === 2) diff = -1;
-      if (diff === -2) diff = 1;
-      setDirection(diff > 0 ? 1 : -1);
       setActiveIndex(index);
     }
   };
 
   return (
     <section
+      ref={sectionRef}
       id="projects"
       className="w-full py-24 sm:py-32 flex flex-col items-center justify-center relative overflow-hidden text-white z-10"
     >
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+      {/* Background ambient lighting (zero-blur CSS radial gradients) */}
+      <div
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] rounded-full pointer-events-none -z-10"
+        style={{ background: "radial-gradient(ellipse, rgba(6,182,212,0.1) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none -z-10"
+        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%)" }}
+      />
 
       {/* Header with badge */}
       <div className="flex flex-col items-center text-center mb-8 px-4">
@@ -209,19 +229,16 @@ const Projects = () => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Orbital Track Graphics (3D angled ellipse under the cards) */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] max-w-[94vw] h-[260px] rounded-[50%] border border-cyan-500/20 pointer-events-none -z-10 shadow-[0_0_50px_rgba(6,182,212,0.12)]"
           style={{ transform: "translate(-50%, -50%) rotateX(68deg)" }}
         >
-          {/* Animated dashed orbit ring */}
           <div className="absolute inset-0 rounded-[50%] border border-dashed border-cyan-400/25 animate-spin-slow" />
-          {/* Orbit glowing nodes */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_12px_#38bdf8]" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_12px_#facc15]" />
         </div>
 
-        {/* The Revolving Project Cards (Baseline + Auto-Synced Featured) */}
+        {/* Revolving Project Cards */}
         {projectList.map((project, idx) => {
           const transform = getCardTransform(idx);
           const isCenter = transform.isCenter;
@@ -246,6 +263,7 @@ const Projects = () => {
                 zIndex: transform.zIndex,
                 transformStyle: "preserve-3d",
                 willChange: "transform, opacity",
+                pointerEvents: transform.isVisible ? "auto" : "none",
               }}
               className={`absolute w-[290px] sm:w-[350px] md:w-[380px] rounded-2xl overflow-hidden cursor-pointer ${
                 isCenter
@@ -258,6 +276,7 @@ const Projects = () => {
                 <img
                   src={project.image}
                   alt={project.name}
+                  loading="lazy"
                   onError={(e) => {
                     e.currentTarget.src = `https://opengraph.githubassets.com/1/himanvic/${project.name.toLowerCase().replace(/\s+/g, "-")}`;
                   }}
@@ -267,7 +286,6 @@ const Projects = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#090d1f] via-transparent to-black/30 pointer-events-none" />
 
-                {/* Top Floating Badges */}
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[11px] font-mono flex items-center gap-1.5 text-emerald-300">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Live App</span>
@@ -298,7 +316,6 @@ const Projects = () => {
                     {project.description}
                   </p>
 
-                  {/* Tech stack pills */}
                   <div className="flex flex-wrap gap-1.5 mb-5">
                     {project.tech?.map((t) => (
                       <span
@@ -311,7 +328,6 @@ const Projects = () => {
                   </div>
                 </div>
 
-                {/* Card Action Button */}
                 {isCenter ? (
                   <a
                     href={project.link}
@@ -360,13 +376,7 @@ const Projects = () => {
             return (
               <button
                 key={project.id}
-                onClick={() => {
-                  let diff = idx - activeIndex;
-                  if (diff === 2) diff = -1;
-                  if (diff === -2) diff = 1;
-                  setDirection(diff > 0 ? 1 : -1);
-                  setActiveIndex(idx);
-                }}
+                onClick={() => setActiveIndex(idx)}
                 aria-label={`Jump to ${project.name}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer flex items-center gap-1.5 ${
                   isActive
@@ -385,7 +395,6 @@ const Projects = () => {
           })}
         </div>
 
-        {/* Auto-revolve toggle button */}
         <button
           onClick={() => setIsAutoPlay((prev) => !prev)}
           className="flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-cyan-300 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
@@ -405,7 +414,6 @@ const Projects = () => {
         </button>
       </div>
 
-      {/* View All Projects Button */}
       <Link
         to="/projects"
         className="mt-10 px-7 py-3 rounded-full bg-gradient-to-r from-cyan-950/70 via-slate-900/80 to-cyan-950/70 border border-cyan-500/40 text-cyan-200 text-sm sm:text-base font-semibold hover:text-white hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.35)] transition-all cursor-pointer backdrop-blur-md font-mono"

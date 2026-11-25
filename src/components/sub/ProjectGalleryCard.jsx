@@ -6,14 +6,13 @@ import { FaGithub, FaStar, FaExternalLinkAlt } from "react-icons/fa";
 const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => {
   const [imgError, setImgError] = useState(!image);
   const cardRef = useRef(null);
-  const [transformStyle, setTransformStyle] = useState("");
-  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const glareRef = useRef(null);
 
   const isGithub = link && link.includes("github.com");
   const hasCpp = tech?.some((t) => t.toLowerCase().includes("c++") || t.toLowerCase() === "cpp");
   const hasPython = tech?.some((t) => t.toLowerCase().includes("python"));
 
-  // 3D Perspective Tilt & Holographic Specular Glare
+  // Direct DOM tilt & specular sheen updates (zero React re-renders per mouse move)
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -25,19 +24,22 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
     const rotateX = ((y - centerY) / centerY) * -8;
     const rotateY = ((x - centerX) / centerX) * 8;
 
-    setTransformStyle(
-      `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`
-    );
-    setGlare({
-      x: (x / rect.width) * 100,
-      y: (y / rect.height) * 100,
-      opacity: 0.18,
-    });
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.025, 1.025, 1.025)`;
+    if (glareRef.current) {
+      const gx = ((x / rect.width) * 100).toFixed(1);
+      const gy = ((y / rect.height) * 100).toFixed(1);
+      glareRef.current.style.opacity = "0.18";
+      glareRef.current.style.background = `radial-gradient(circle 240px at ${gx}% ${gy}%, rgba(0, 240, 255, 0.35), rgba(250, 204, 21, 0.15) 40%, transparent 80%)`;
+    }
   };
 
   const handleMouseLeave = () => {
-    setTransformStyle("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
-    setGlare((prev) => ({ ...prev, opacity: 0 }));
+    if (cardRef.current) {
+      cardRef.current.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+    }
+    if (glareRef.current) {
+      glareRef.current.style.opacity = "0";
+    }
   };
 
   return (
@@ -46,7 +48,6 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transform: transformStyle,
         transformStyle: "preserve-3d",
         transition: "transform 0.15s ease-out",
       }}
@@ -54,30 +55,26 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
     >
       {/* Dynamic Specular Holographic Sheen */}
       <div
+        ref={glareRef}
         className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300 rounded-2xl"
-        style={{
-          opacity: glare.opacity,
-          background: `radial-gradient(circle 240px at ${glare.x}% ${glare.y}%, rgba(0, 240, 255, 0.35), rgba(250, 204, 21, 0.15) 40%, transparent 80%)`,
-        }}
+        style={{ opacity: 0 }}
       />
 
       <div>
-        {/* Header Visual: Image or Cyber Language Holographic Fallback */}
         <div className="relative w-full h-48 overflow-hidden bg-[#060914] flex items-center justify-center">
           {!imgError ? (
             <img
               src={image}
               alt={name}
+              loading="lazy"
               onError={() => setImgError(true)}
               className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="relative w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-[#0c1329] via-[#070b1a] to-[#02050f] border-b border-cyan-500/20 select-none">
-              {/* Concentric subtle background cyber rings */}
               <div className="absolute w-32 h-32 rounded-full border border-cyan-500/15 pointer-events-none" />
               <div className="absolute w-20 h-20 rounded-full border border-amber-400/10 pointer-events-none" />
 
-              {/* Glowing Language Icon */}
               <div className="relative z-10 mb-2 p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
                 {hasCpp ? (
                   <SiCplusplus className="text-4xl text-sky-400 drop-shadow-[0_0_12px_rgba(56,189,248,0.6)]" />
@@ -88,14 +85,12 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
                 )}
               </div>
 
-              {/* Repo Name Pill */}
               <span className="relative z-10 text-xs font-mono font-semibold text-gray-200 tracking-wider">
                 {name}
               </span>
             </div>
           )}
 
-          {/* Stars badge if > 0 */}
           {stars > 0 && (
             <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md border border-amber-400/30 text-amber-300 text-[10px] font-mono flex items-center gap-1 shadow-md">
               <FaStar className="text-[9px]" />
@@ -104,7 +99,6 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
           )}
         </div>
 
-        {/* Card Body */}
         <div className="p-5">
           <h3 className="text-lg font-bold mb-2 text-white group-hover:text-cyan-300 transition-colors">
             {name}
@@ -126,7 +120,6 @@ const ProjectGalleryCard = ({ name, description, link, tech, image, stars }) => 
         </div>
       </div>
 
-      {/* Action CTA Button */}
       {link && (
         <div className="px-5 pb-5">
           <a

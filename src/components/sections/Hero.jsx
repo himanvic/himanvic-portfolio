@@ -1,8 +1,29 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import SolarSystem from "../sub/SolarSystem";
 import RotatingTitles from "../sub/RotatingTitles";
 
 const Hero = () => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !document.hidden) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="hero"
@@ -18,6 +39,7 @@ const Hero = () => {
         }}
       >
         <video
+          ref={videoRef}
           className="w-full h-full object-cover"
           style={{
             transform: "rotate(180deg) rotateX(10deg) scale(1.06)",
