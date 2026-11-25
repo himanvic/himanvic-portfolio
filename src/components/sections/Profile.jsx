@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { slideInFromTop } from "../../utils/motion";
 import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
+import { initCppEngine, getCppEngineSync } from "@/utils/cppEngine";
 
 const WORDS = [
   {
@@ -56,6 +57,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
   const animFrameRef = useRef(null);
   const lastSwitchTimeRef = useRef(performance.now());
   const activeIndexRef = useRef(activeIndex);
+  const wasmRef = useRef(getCppEngineSync());
 
   // Keep activeIndexRef synced
   useEffect(() => {
@@ -126,6 +128,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
 
     const palette = wordObj.colors;
     const particles = particlesRef.current;
+    const wasm = wasmRef.current;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
@@ -134,11 +137,16 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
       p.ty = target[1];
       p.color = palette[Math.floor(Math.random() * palette.length)];
 
-      // Supernova radial burst outward
       const angle = Math.random() * Math.PI * 2;
       const force = (Math.random() * 16 + 6) * burstIntensity;
-      p.vx += Math.cos(angle) * force;
-      p.vy += Math.sin(angle) * force;
+      const bvx = Math.cos(angle) * force;
+      const bvy = Math.sin(angle) * force;
+      p.vx += bvx;
+      p.vy += bvy;
+
+      if (wasm) {
+        wasm.exports.set_particle_target(i, target[0], target[1], bvx, bvy);
+      }
     }
   }, [getWordTargets]);
 
@@ -155,20 +163,24 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
     });
 
     const particles = particlesRef.current;
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      const dx = p.x - cx;
-      const dy = p.y - cy;
-      const dist = Math.hypot(dx, dy);
+    if (wasmRef.current) {
+      wasmRef.current.exports.trigger_shockwave(particles.length, cx, cy);
+    } else {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.hypot(dx, dy);
 
-      if (dist < 260 && dist > 0) {
-        const push = (1 - dist / 260) * 32;
-        const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.3;
-        p.vx += Math.cos(angle) * push;
-        p.vy += Math.sin(angle) * push;
+        if (dist < 260 && dist > 0) {
+          const push = (1 - dist / 260) * 32;
+          const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.3;
+          p.vx += Math.cos(angle) * push;
+          p.vy += Math.sin(angle) * push;
+        }
       }
     }
-    lastSwitchTimeRef.current = performance.now(); // Reset cycle timer on user interaction
+    lastSwitchTimeRef.current = performance.now();
   }, []);
 
   // Initialize and run the simulation loop
@@ -217,6 +229,20 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
       }
       particlesRef.current = next;
     }
+
+    // Sync particles into C++20 WASM linear memory as soon as engine loads
+    let cancelledWasm = false;
+    const syncToWasm = (wasm) => {
+      if (!wasm || cancelledWasm) return;
+      wasmRef.current = wasm;
+      const list = particlesRef.current;
+      for (let i = 0; i < list.length; i++) {
+        const p = list[i];
+        wasm.exports.set_particle_pos(i, p.x, p.y, p.vx, p.vy, p.tx, p.ty, p.seed);
+      }
+    };
+    if (wasmRef.current) syncToWasm(wasmRef.current);
+    else initCppEngine().then(syncToWasm);
 
     updateSize();
 
@@ -299,41 +325,64 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
       const tSec = time * 0.001;
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
+      const wasm = wasmRef.current;
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-
-        // Quantum zero-point energy breathing
-        const jitterX = Math.sin(tSec * 2.5 + p.seed) * 0.65;
-        const jitterY = Math.cos(tSec * 2.2 + p.seed * 1.3) * 0.65;
-
-        // Damped spring physics towards target position
-        const dx = p.tx + jitterX - p.x;
-        const dy = p.ty + jitterY - p.y;
-        p.vx = (p.vx + dx * 0.055) * 0.84;
-        p.vy = (p.vy + dy * 0.055) * 0.84;
-
-        // Interactive cursor repulsion field
-        if (mouse.active) {
-          const mdx = p.x - mouse.x;
-          const mdy = p.y - mouse.y;
-          const dist = Math.hypot(mdx, mdy);
-          if (dist < 110 && dist > 0) {
-            const push = (1 - dist / 110) * 16;
-            p.vx += (mdx / dist) * push;
-            p.vy += (mdy / dist) * push;
-          }
+      if (wasm && particles.length > 0) {
+        wasm.exports.step_particles(
+          particles.length,
+          tSec,
+          mouse.x,
+          mouse.y,
+          mouse.active ? 1 : 0
+        );
+        const xy = wasm.particleXY;
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const px = xy[i * 2];
+          const py = xy[i * 2 + 1];
+          p.x = px;
+          p.y = py;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(px, py, p.size, 0, Math.PI * 2);
+          ctx.fill();
         }
+      } else {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
 
-        // Apply velocity
-        p.x += p.vx;
-        p.y += p.vy;
+          // Quantum zero-point energy breathing
+          const jitterX = Math.sin(tSec * 2.5 + p.seed) * 0.65;
+          const jitterY = Math.cos(tSec * 2.2 + p.seed * 1.3) * 0.65;
 
-        // Draw particle
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+          // Damped spring physics towards target position
+          const dx = p.tx + jitterX - p.x;
+          const dy = p.ty + jitterY - p.y;
+          p.vx = (p.vx + dx * 0.055) * 0.84;
+          p.vy = (p.vy + dy * 0.055) * 0.84;
+
+          // Interactive cursor repulsion field
+          if (mouse.active) {
+            const mdx = p.x - mouse.x;
+            const mdy = p.y - mouse.y;
+            const dist = Math.hypot(mdx, mdy);
+            if (dist < 110 && dist > 0) {
+              const push = (1 - dist / 110) * 16;
+              p.vx += (mdx / dist) * push;
+              p.vy += (mdy / dist) * push;
+            }
+          }
+
+          // Apply velocity
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // Draw particle
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       if (!isVisible || prefersReducedMotion) return;
@@ -343,6 +392,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
     animFrameRef.current = requestAnimationFrame(render);
 
     return () => {
+      cancelledWasm = true;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();

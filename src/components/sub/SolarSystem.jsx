@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { playWarpSound, playCyberBlip } from "@/utils/audio";
 import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
+import { initCppEngine, getCppEngineSync } from "@/utils/cppEngine";
 
 // Defer heavy Three.js cores so initial hero text & CTA paint immediately
 const HoloCore3D = lazy(() => import("./HoloCore3D"));
@@ -142,6 +143,17 @@ const SolarSystem = () => {
   const angleRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
   const animFrameRef = useRef(null);
+  const wasmRef = useRef(getCppEngineSync());
+
+  useEffect(() => {
+    let active = true;
+    initCppEngine().then((wasm) => {
+      if (active && wasm) wasmRef.current = wasm;
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -167,6 +179,22 @@ const SolarSystem = () => {
     const positionPlanets = () => {
       const { rx, ry } = dimensions;
       const count = PLANETS.length;
+      const wasm = wasmRef.current;
+
+      if (wasm) {
+        const hovered = hoveredIndexRef.current ?? -1;
+        wasm.exports.compute_planet_orbits(angleRef.current, rx, ry, count, hovered);
+        const out = wasm.orbitOut;
+        for (let idx = 0; idx < count; idx++) {
+          const el = planetRefs.current[idx];
+          if (!el) continue;
+          const base = idx * 5;
+          el.style.transform = `translate3d(${out[base].toFixed(2)}px, ${out[base + 1].toFixed(2)}px, 0) scale(${out[base + 3].toFixed(3)})`;
+          el.style.zIndex = Math.round(out[base + 2]);
+          el.style.opacity = out[base + 4].toFixed(3);
+        }
+        return;
+      }
 
       for (let idx = 0; idx < count; idx++) {
         const el = planetRefs.current[idx];
