@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaPlay, FaRedo, FaTimes, FaCode } from "react-icons/fa";
 import { SiCplusplus, SiPython } from "react-icons/si";
 import { playCyberBlip, playSuccessSound } from "@/utils/audio";
+import { initCppEngine, getCppEngineSync } from "@/utils/cppEngine";
 
 const INITIAL_ARRAY_SIZE = 22;
 
@@ -99,6 +100,7 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
+      initCppEngine();
       generateNewArray();
       const handleKeyDown = (e) => {
         if (e.key === "Escape") {
@@ -113,8 +115,59 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // BubbleSort visual execution
-  const runBubbleSort = async () => {
+  // Replay exact trace steps computed in compiled C++20 WASM (with JS fallback)
+  const runWasmSort = async (algoId) => {
+    const wasm = getCppEngineSync() || (await initCppEngine());
+    if (!wasm) return false;
+
+    isSortingRef.current = true;
+    setIsSorting(true);
+
+    const arr = [...array];
+    for (let k = 0; k < arr.length; k++) {
+      wasm.sortArray[k] = arr[k];
+    }
+
+    const totalSteps = wasm.exports.sort_run(algoId, arr.length);
+    const trace = wasm.traceBuffer;
+    let comparisons = 0;
+    let swaps = 0;
+
+    for (let s = 0; s < totalSteps; s++) {
+      if (!isSortingRef.current) return true;
+      const base = s * 3;
+      const op = trace[base];
+      const a = trace[base + 1];
+      const b = trace[base + 2];
+
+      setActiveIndices([a, b]);
+      if (op === 0) {
+        comparisons++;
+        setStats({ comparisons, swaps });
+        await sleep(28);
+      } else {
+        swaps++;
+        const tmp = arr[a];
+        arr[a] = arr[b];
+        arr[b] = tmp;
+        setArray([...arr]);
+        setStats({ comparisons, swaps });
+        playCyberBlip(320 + arr[a] * 5, 0.025);
+        await sleep(40);
+      }
+    }
+
+    if (!isSortingRef.current) return true;
+    setActiveIndices([]);
+    setIsSorting(false);
+    setIsCompleted(true);
+    isSortingRef.current = false;
+    playSuccessSound();
+    return true;
+  };
+
+  // Fallback JS BubbleSort if WASM is blocked
+  const runBubbleSortFallback = async () => {
     isSortingRef.current = true;
     setIsSorting(true);
     const arr = [...array];
@@ -152,8 +205,8 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
     playSuccessSound();
   };
 
-  // QuickSort visual execution
-  const runQuickSort = async () => {
+  // Fallback JS QuickSort if WASM is blocked
+  const runQuickSortFallback = async () => {
     isSortingRef.current = true;
     setIsSorting(true);
     const arr = [...array];
@@ -214,10 +267,13 @@ export const AlgorithmVisualizer = ({ isOpen, onClose }) => {
     playSuccessSound();
   };
 
-  const handleStartSort = () => {
+  const handleStartSort = async () => {
     if (isSorting) return;
-    if (algorithm === "quicksort") runQuickSort();
-    else runBubbleSort();
+    const algoId = algorithm === "quicksort" ? 0 : 1;
+    const ranWasm = await runWasmSort(algoId);
+    if (ranWasm) return;
+    if (algorithm === "quicksort") runQuickSortFallback();
+    else runBubbleSortFallback();
   };
 
   if (!isOpen) return null;

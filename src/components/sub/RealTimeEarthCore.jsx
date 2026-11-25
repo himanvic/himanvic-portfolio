@@ -3,10 +3,16 @@ import React, { useRef, useEffect, useMemo, useState, Suspense } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
+import { initCppEngine, getCppEngineSync } from "@/utils/cppEngine";
 
 const computeUtcSunDirection = () => {
   const now = new Date();
   const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60;
+  const wasm = getCppEngineSync();
+  if (wasm) {
+    wasm.exports.compute_utc_sun_vector(utcHours);
+    return new THREE.Vector3(wasm.sunVec[0], wasm.sunVec[1], wasm.sunVec[2]);
+  }
   const theta = (utcHours / 24) * Math.PI * 2;
   return new THREE.Vector3(-Math.cos(theta), 0.25, -Math.sin(theta)).normalize();
 };
@@ -72,8 +78,11 @@ const EarthSphereMesh = ({ isHovered, isActive }) => {
     });
   }, [dayMap, nightMap, specularMap, sunDirection]);
 
-  // Refresh solar terminator angle every 60s in real time
+  // Refresh solar terminator angle via C++ WASM sun vector calculation
   useEffect(() => {
+    initCppEngine().then((wasm) => {
+      if (wasm) earthMaterial.uniforms.sunDirection.value.copy(computeUtcSunDirection());
+    });
     const timer = setInterval(() => {
       earthMaterial.uniforms.sunDirection.value.copy(computeUtcSunDirection());
     }, 60000);

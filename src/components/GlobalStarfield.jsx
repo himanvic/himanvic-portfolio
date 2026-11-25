@@ -2,27 +2,34 @@ import React, { useRef, useEffect, useState, useMemo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
+import { initCppEngine, getCppEngineSync } from "@/utils/cppEngine";
 
 const BASE_DISTANT_STARS = 2200;
 const BASE_CYAN_SPARKS = 450;
 const BASE_AMBER_SPARKS = 200;
 
 /**
- * Uniform 3D spherical point sampler (replaces maath dependency cleanly)
+ * Generates uniform 3D spherical star coordinates via C++20 WASM when ready,
+ * with identical inline Archimedes spherical fallback before instantiation.
  */
-const generateSpherePoints = (count, radius) => {
+const generateSpherePoints = (count, radius, seed = 1337) => {
+  const wasm = getCppEngineSync();
+  if (wasm && count <= 3072) {
+    wasm.exports.fill_sphere_points(count, radius, seed);
+    return new Float32Array(wasm.starXyz.subarray(0, count * 3));
+  }
   const arr = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     const u = Math.random();
     const v = Math.random();
     const theta = u * 2 * Math.PI;
-    const phi = Math.acos(2 * v - 1);
+    const z = 2 * v - 1;
+    const rXY = Math.sqrt(Math.max(0, 1 - z * z));
     const r = radius * Math.cbrt(Math.random());
-    const sinPhi = Math.sin(phi);
     const offset = i * 3;
-    arr[offset] = r * sinPhi * Math.cos(theta);
-    arr[offset + 1] = r * sinPhi * Math.sin(theta);
-    arr[offset + 2] = r * Math.cos(phi);
+    arr[offset] = r * rXY * Math.cos(theta);
+    arr[offset + 1] = r * rXY * Math.sin(theta);
+    arr[offset + 2] = r * z;
   }
   return arr;
 };
@@ -39,17 +46,21 @@ const StarFieldMesh = ({ starScale, isCoarsePointer }) => {
   const warpSpeedRef = useRef(0);
 
   const distantPositions = useMemo(
-    () => generateSpherePoints(Math.round(BASE_DISTANT_STARS * starScale), 1.25),
+    () => generateSpherePoints(Math.round(BASE_DISTANT_STARS * starScale), 1.25, 1337),
     [starScale]
   );
   const cyanPositions = useMemo(
-    () => generateSpherePoints(Math.round(BASE_CYAN_SPARKS * starScale), 1.1),
+    () => generateSpherePoints(Math.round(BASE_CYAN_SPARKS * starScale), 1.1, 4242),
     [starScale]
   );
   const amberPositions = useMemo(
-    () => generateSpherePoints(Math.round(BASE_AMBER_SPARKS * starScale), 0.95),
+    () => generateSpherePoints(Math.round(BASE_AMBER_SPARKS * starScale), 0.95, 7919),
     [starScale]
   );
+
+  useEffect(() => {
+    initCppEngine();
+  }, []);
 
   useEffect(() => {
     const handlePointerMove = (e) => {

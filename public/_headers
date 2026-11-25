@@ -11,7 +11,7 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://opengraph.githubassets.com https://avatars.githubusercontent.com; media-src 'self'; connect-src 'self' https://api.github.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests;
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://opengraph.githubassets.com https://avatars.githubusercontent.com; media-src 'self'; connect-src 'self' https://api.github.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests;
 
 # Content-hashed Vite JS/CSS bundles - Immutable 1 year cache for instant reload
 /assets/*.js
@@ -28,4 +28,7 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /assets/textures/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/assets/wasm/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
