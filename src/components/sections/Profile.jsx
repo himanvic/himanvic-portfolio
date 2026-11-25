@@ -48,6 +48,15 @@ const WORDS = [
   },
 ];
 
+const sampleTargetPoint = (targets, index, total) => {
+  if (!targets.length) return [0, 0];
+  const mappedIndex = Math.min(
+    targets.length - 1,
+    Math.floor((index * targets.length) / Math.max(1, total))
+  );
+  return targets[mappedIndex];
+};
+
 const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDpr, prefersReducedMotion }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -66,10 +75,12 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
 
   // Compute text target points using offscreen canvas sampling
   const getWordTargets = useCallback((text, width, height) => {
-    if (!width || !height) return [];
+    const w = Math.round(width);
+    const h = Math.round(height);
+    if (w <= 0 || h <= 0) return [];
     const off = document.createElement("canvas");
-    off.width = width;
-    off.height = height;
+    off.width = w;
+    off.height = h;
     const g = off.getContext("2d", { willReadFrequently: true });
     if (!g) return [];
 
@@ -78,23 +89,23 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
     g.textBaseline = "middle";
 
     const charCount = text.length;
-    let fontSize = Math.min(130, Math.floor(width / (charCount * 0.58)));
-    if (text === "C++") fontSize = Math.min(160, Math.floor(width * 0.36));
-    if (text === "Python") fontSize = Math.min(135, Math.floor(width * 0.28));
-    if (text === "Dynamics") fontSize = Math.min(120, Math.floor(width * 0.19));
-    if (text === "Curiosity") fontSize = Math.min(110, Math.floor(width * 0.17));
+    let fontSize = Math.min(130, Math.floor(w / (charCount * 0.58)));
+    if (text === "C++") fontSize = Math.min(160, Math.floor(w * 0.36));
+    if (text === "Python") fontSize = Math.min(135, Math.floor(w * 0.28));
+    if (text === "Dynamics") fontSize = Math.min(120, Math.floor(w * 0.19));
+    if (text === "Curiosity") fontSize = Math.min(110, Math.floor(w * 0.17));
     if (fontSize < 36) fontSize = 36;
 
     g.font = `900 ${fontSize}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    g.fillText(text, width / 2, height / 2);
+    g.fillText(text, w / 2, h / 2);
 
-    const imgData = g.getImageData(0, 0, width, height).data;
+    const imgData = g.getImageData(0, 0, w, h).data;
     const targets = [];
-    const step = width < 600 ? 3 : 4;
+    const step = w < 600 ? 3 : 4;
 
-    for (let y = 0; y < height; y += step) {
-      for (let x = 0; x < width; x += step) {
-        if (imgData[(y * width + x) * 4 + 3] > 120) {
+    for (let y = 0; y < h; y += step) {
+      for (let x = 0; x < w; x += step) {
+        if (imgData[(y * w + x) * 4 + 3] > 120) {
           targets.push([x, y]);
         }
       }
@@ -104,8 +115,8 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
     if (targets.length === 0) {
       for (let i = 0; i < 500; i++) {
         const theta = (i / 500) * Math.PI * 2;
-        const radius = Math.min(width, height) * 0.3;
-        targets.push([width / 2 + Math.cos(theta) * radius, height / 2 + Math.sin(theta) * radius]);
+        const radius = Math.min(w, h) * 0.3;
+        targets.push([w / 2 + Math.cos(theta) * radius, h / 2 + Math.sin(theta) * radius]);
       }
     }
 
@@ -132,7 +143,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
-      const target = targets[i % targets.length];
+      const target = sampleTargetPoint(targets, i, particles.length);
       p.tx = target[0];
       p.ty = target[1];
       p.color = palette[Math.floor(Math.random() * palette.length)];
@@ -212,7 +223,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDp
       const initialTargets = getWordTargets(WORDS[0].name, 800, 380);
       const next = [];
       for (let i = 0; i < particleCount; i++) {
-        const t = initialTargets[i % initialTargets.length] || [400, 190];
+        const t = sampleTargetPoint(initialTargets, i, particleCount) || [400, 190];
         next.push(
           particlesRef.current[i] || {
             x: t[0] + (Math.random() - 0.5) * 100,
