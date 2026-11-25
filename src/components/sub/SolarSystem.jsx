@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import HoloCore3D from "./HoloCore3D";
 import { playWarpSound, playCyberBlip } from "@/utils/audio";
 
-// Lazy load 3D Real-Time Earth core for optimal performance
+// Lazy load 3D Real-Time Earth core for optimal initial load performance
 const RealTimeEarthCore = lazy(() => import("./RealTimeEarthCore"));
 
 import {
@@ -74,9 +74,17 @@ const PLANETS = [
 
 const SolarSystem = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
   const [isCoreHovered, setIsCoreHovered] = useState(false);
   const [isEarthActive, setIsEarthActive] = useState(false);
+
+  // Refs avoid tearing down the RAF loop when hovering planets or dragging Earth
+  const isPausedRef = useRef(false);
+  const hoveredIndexRef = useRef(null);
+  const pointerDownPosRef = useRef(null);
+
+  useEffect(() => {
+    hoveredIndexRef.current = hoveredIndex;
+  }, [hoveredIndex]);
 
   useEffect(() => {
     const handleToggleEarth = (e) => {
@@ -87,14 +95,12 @@ const SolarSystem = () => {
       }
     };
     window.addEventListener("toggle-earth-core", handleToggleEarth);
-    window.addEventListener("open-earth-modal", handleToggleEarth);
     return () => {
       window.removeEventListener("toggle-earth-core", handleToggleEarth);
-      window.removeEventListener("open-earth-modal", handleToggleEarth);
     };
   }, []);
 
-  const handleToggleCore = () => {
+  const toggleCore = () => {
     setIsEarthActive((prev) => {
       const next = !prev;
       if (next) {
@@ -104,6 +110,21 @@ const SolarSystem = () => {
       }
       return next;
     });
+  };
+
+  // Distinguish intentional click/tap (< 6px move) from OrbitControls drag on the 3D globe
+  const handleCorePointerDown = (e) => {
+    pointerDownPosRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleCorePointerUp = (e) => {
+    if (!pointerDownPosRef.current) return;
+    const dx = e.clientX - pointerDownPosRef.current.x;
+    const dy = e.clientY - pointerDownPosRef.current.y;
+    pointerDownPosRef.current = null;
+    if (dx * dx + dy * dy < 36) {
+      toggleCore();
+    }
   };
 
   const [dimensions, setDimensions] = useState({
@@ -118,7 +139,6 @@ const SolarSystem = () => {
   const lastTimeRef = useRef(performance.now());
   const animFrameRef = useRef(null);
 
-  // Responsive radii based on viewport
   useEffect(() => {
     const updateDimensions = () => {
       const isMobile = window.innerWidth < 640;
@@ -133,80 +153,66 @@ const SolarSystem = () => {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // 60-120fps direct DOM animation loop for buttery orbital physics
+  // 60-120fps direct DOM orbital loop (never resets on hover)
   useEffect(() => {
-    const tiltRad = (-10 * Math.PI) / 180; // -10deg tilt
+    const tiltRad = (-10 * Math.PI) / 180;
     const cosTilt = Math.cos(tiltRad);
     const sinTilt = Math.sin(tiltRad);
-
-    const orbitDuration = 22; // Seconds for full 360 deg revolution
+    const orbitDuration = 22;
     const baseSpeed = (2 * Math.PI) / orbitDuration;
 
     const animate = (now) => {
-      const dt = (now - lastTimeRef.current) / 1000;
+      const dt = Math.min((now - lastTimeRef.current) / 1000, 0.1);
       lastTimeRef.current = now;
 
-      // Speed modulation on hover
-      const speedMultiplier = isPaused ? 0.2 : 1.0;
+      const speedMultiplier = isPausedRef.current ? 0.2 : 1.0;
       angleRef.current = (angleRef.current + baseSpeed * speedMultiplier * dt) % (2 * Math.PI);
 
       const { rx, ry } = dimensions;
       const count = PLANETS.length;
 
-      PLANETS.forEach((_, idx) => {
+      for (let idx = 0; idx < count; idx++) {
         const el = planetRefs.current[idx];
-        if (!el) return;
+        if (!el) continue;
 
-        // Angle for this planet
         const planetAngle = angleRef.current + (idx * 2 * Math.PI) / count;
-
-        // Elliptical coordinates before tilt
         const x0 = rx * Math.cos(planetAngle);
         const y0 = ry * Math.sin(planetAngle);
-
-        // Apply 3D perspective tilt
         const x = x0 * cosTilt - y0 * sinTilt;
         const y = x0 * sinTilt + y0 * cosTilt;
-
-        // Depth: sin(planetAngle)
-        // > 0 means coming towards viewer (in front of Sun / Earth)
-        // < 0 means moving away (behind Sun / Earth)
         const depth = Math.sin(planetAngle);
 
         let zIndex = 20;
         let scale = 1.0;
         let opacity = 1.0;
-        let brightness = 1.0;
 
-        if (depth > 0) {
-          // Front hemisphere: pass in front of central core (z-30)
+        if (hoveredIndexRef.current === idx) {
+          zIndex = 50;
+          scale = 1.12;
+          opacity = 1.0;
+        } else if (depth > 0) {
           zIndex = 30;
-          scale = 0.98 + 0.22 * depth; // 0.98 to 1.20
-          opacity = 0.90 + 0.10 * depth; // 0.90 to 1.0
-          brightness = 1.0 + 0.25 * depth;
+          scale = 0.98 + 0.2 * depth;
+          opacity = 0.9 + 0.1 * depth;
         } else {
-          // Back hemisphere: pass behind central core (z-10)
           zIndex = 10;
-          scale = 0.80 + 0.18 * (depth + 1); // 0.80 to 0.98
-          opacity = 0.45 + 0.45 * (depth + 1); // 0.45 to 0.90
-          brightness = 0.65 + 0.35 * (depth + 1);
+          scale = 0.8 + 0.18 * (depth + 1);
+          opacity = 0.45 + 0.45 * (depth + 1);
         }
 
-        // Billboarding: translate to orbital coordinates, scale for depth,
-        // while the child icon stays 100% upright and faces the viewer directly
-        el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale.toFixed(3)})`;
+        el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${scale.toFixed(3)})`;
         el.style.zIndex = zIndex;
         el.style.opacity = opacity.toFixed(3);
-        el.style.filter = `brightness(${brightness.toFixed(2)})`;
-      });
+      }
 
-      if (!isVisibleRef.current) {
+      if (!isVisibleRef.current || document.hidden) {
         animFrameRef.current = null;
         return;
       }
       animFrameRef.current = requestAnimationFrame(animate);
     };
 
+    lastTimeRef.current = performance.now();
     animFrameRef.current = requestAnimationFrame(animate);
 
     let observer = null;
@@ -214,7 +220,7 @@ const SolarSystem = () => {
       observer = new IntersectionObserver(
         ([entry]) => {
           isVisibleRef.current = entry.isIntersecting;
-          if (entry.isIntersecting && !animFrameRef.current) {
+          if (entry.isIntersecting && !document.hidden && !animFrameRef.current) {
             lastTimeRef.current = performance.now();
             animFrameRef.current = requestAnimationFrame(animate);
           }
@@ -224,25 +230,37 @@ const SolarSystem = () => {
       observer.observe(containerRef.current);
     }
 
+    const handleVisibility = () => {
+      if (!document.hidden && isVisibleRef.current && !animFrameRef.current) {
+        lastTimeRef.current = performance.now();
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
       observer?.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [dimensions, isPaused]);
+  }, [dimensions]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-[310px] h-[250px] sm:w-[410px] sm:h-[280px] flex items-center justify-center select-none"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => {
+        isPausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        isPausedRef.current = false;
+      }}
     >
-      {/* 1. Orbit Path SVG (Matching the -10deg tilted ellipse with radar ticks) */}
+      {/* 1. Orbit Path SVG (-10deg tilted ellipse) */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
-        style={{
-          transform: "rotate(-10deg)",
-        }}
+        style={{ transform: "rotate(-10deg)" }}
       >
         <defs>
           <linearGradient id="orbitLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -263,7 +281,6 @@ const SolarSystem = () => {
           strokeDasharray="6 8"
           opacity="0.6"
         />
-        {/* Subtle Outer Trajectory Track */}
         <ellipse
           cx="50%"
           cy="50%"
@@ -278,52 +295,50 @@ const SolarSystem = () => {
 
       {/* 2. Central Core (z-20) - Seamless In-Place Morph between "H" Sun and 3D Real-Time Earth */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-auto">
-        {/* Deep Volumetric Atmospheric Corona Glow */}
+        {/* Volumetric Atmospheric Corona Glow */}
         <div
           className={`absolute rounded-full blur-3xl transition-all duration-700 pointer-events-none ${
             isEarthActive
-              ? "w-48 h-48 sm:w-60 sm:h-60 bg-gradient-to-r from-cyan-500/30 via-sky-500/25 to-blue-600/25 scale-105"
+              ? "w-48 h-48 sm:w-56 sm:h-56 bg-gradient-to-r from-cyan-500/25 via-sky-500/20 to-blue-600/20"
               : "w-44 h-44 sm:w-56 sm:h-56 bg-gradient-to-r from-amber-500/25 via-cyan-500/25 to-blue-500/20 animate-pulse"
           }`}
         />
 
         {/* Outer Orbiting Compass Radar Rings */}
-        <div className="absolute w-32 h-32 sm:w-38 sm:h-38 rounded-full border border-amber-400/25 border-dashed animate-spin-slow pointer-events-none" />
+        <div className="absolute w-32 h-32 sm:w-36 sm:h-36 rounded-full border border-amber-400/25 border-dashed animate-spin-slow pointer-events-none" />
         <div
-          className="absolute w-26 h-26 sm:w-32 sm:h-32 rounded-full border border-cyan-400/25 pointer-events-none"
+          className="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full border border-cyan-400/20 pointer-events-none"
           style={{ animation: "spin 16s linear infinite reverse" }}
         />
 
-        {/* Morphing Core Container: Clicking toggles between Holographic "H" Sun and 3D Real-Time Earth */}
+        {/* Morphing Core Container */}
         <div
-          onClick={handleToggleCore}
+          onPointerDown={handleCorePointerDown}
+          onPointerUp={handleCorePointerUp}
           onMouseEnter={() => setIsCoreHovered(true)}
           onMouseLeave={() => setIsCoreHovered(false)}
           className={`relative rounded-full flex items-center justify-center transition-all duration-500 cursor-pointer overflow-visible ${
             isEarthActive
-              ? "w-26 h-26 sm:w-32 sm:h-32 shadow-[0_0_50px_rgba(0,240,255,0.45)] ring-1 ring-cyan-400/40"
-              : "w-22 h-22 sm:w-26 sm:h-26 bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] ring-1 ring-amber-400/30 hover:scale-108 backdrop-blur-2xl"
+              ? "w-28 h-28 sm:w-32 sm:h-32"
+              : "w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] bg-gradient-to-br from-[#0c1427]/85 via-[#080d1a]/90 to-[#02050e]/85 border-2 border-cyan-400/50 shadow-[0_0_40px_rgba(6,182,212,0.4),inset_0_0_25px_rgba(250,204,21,0.2)] ring-1 ring-amber-400/30 hover:scale-105 backdrop-blur-2xl"
           }`}
         >
           <AnimatePresence mode="wait">
             {!isEarthActive ? (
               <motion.div
                 key="h-sun"
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.82 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                exit={{ opacity: 0, scale: 0.82 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="w-full h-full flex items-center justify-center relative"
               >
-                {/* 3D Holographic Wireframe Core (Icosahedron + Octahedron + Ring) */}
                 <div className="absolute inset-[-14px] pointer-events-none z-10">
                   <HoloCore3D isHovered={isCoreHovered} />
                 </div>
 
-                {/* Inner Glowing Reticle */}
                 <div className="absolute inset-2 rounded-full border border-cyan-400/20 pointer-events-none z-0" />
 
-                {/* Pure Laser-Cut Metallic "H" Monogram */}
                 <span className="relative z-20 text-3xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-200 to-amber-300 drop-shadow-[0_0_20px_rgba(56,189,248,0.85)] select-none pointer-events-none">
                   H
                 </span>
@@ -331,10 +346,10 @@ const SolarSystem = () => {
             ) : (
               <motion.div
                 key="earth-globe"
-                initial={{ opacity: 0, scale: 0.75 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.75 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
                 className="w-full h-full relative flex items-center justify-center"
               >
                 <Suspense
@@ -352,7 +367,7 @@ const SolarSystem = () => {
         </div>
       </div>
 
-      {/* 3. Orbiting Planetary Nodes (Direct DOM 3D Billboarding around the Central Core) */}
+      {/* 3. Orbiting Planetary Nodes */}
       {PLANETS.map((planet, idx) => {
         const IconComponent = planet.icon;
         const isHovered = hoveredIndex === idx;
@@ -366,22 +381,21 @@ const SolarSystem = () => {
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <div className="relative group flex flex-col items-center">
-              {/* Planetary Orbital Capsule */}
               <div
-                className={`w-12 h-12 sm:w-14 sm:h-14 p-2.5 rounded-2xl flex items-center justify-center bg-[#090d1f]/90 backdrop-blur-xl border ${planet.border} shadow-xl transition-all duration-300 group-hover:scale-115 group-hover:bg-[#0c142b]`}
+                className="w-12 h-12 sm:w-14 sm:h-14 p-2.5 rounded-2xl flex items-center justify-center bg-[#090d1f]/90 backdrop-blur-xl border shadow-xl transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#0c142b]"
                 style={{
+                  borderColor: undefined,
                   boxShadow: isHovered
                     ? `0 0 28px ${planet.glow}, inset 0 0 12px ${planet.glow}`
                     : `0 0 16px ${planet.glow}`,
                 }}
               >
-                {/* Tech Icon */}
+                <div className={`absolute inset-0 rounded-2xl border ${planet.border} pointer-events-none`} />
                 <IconComponent
                   className="text-2xl sm:text-3xl transition-transform duration-200 group-hover:rotate-6 group-hover:scale-105"
                   style={{ color: planet.color }}
                 />
 
-                {/* Micro Status Beacon Pip */}
                 <span
                   className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: planet.color, boxShadow: `0 0 6px ${planet.color}` }}
@@ -390,16 +404,16 @@ const SolarSystem = () => {
 
               {/* Informative HUD Tooltip on Hover */}
               <div
-                className={`absolute -bottom-10 px-3 py-1 rounded-lg bg-slate-950/95 border border-cyan-500/30 text-center whitespace-nowrap pointer-events-none transition-all duration-200 shadow-2xl backdrop-blur-md ${
+                className={`absolute -bottom-11 px-3 py-1 rounded-lg bg-slate-950/95 border border-cyan-500/30 text-center whitespace-nowrap pointer-events-none transition-all duration-200 shadow-2xl backdrop-blur-md ${
                   isHovered
                     ? "opacity-100 scale-100 -translate-y-0.5"
                     : "opacity-0 scale-95 pointer-events-none"
                 }`}
-                style={{ zIndex: 50 }}
+                style={{ zIndex: 60 }}
               >
                 <div className="text-[11px] font-bold text-white tracking-wide flex items-center gap-1.5 justify-center">
                   <span>{planet.name}</span>
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${planet.badge}`}>Active</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${planet.badge}`}>Active</span>
                 </div>
                 <div className="text-[9px] text-gray-300 font-mono mt-0.5">
                   {planet.role}

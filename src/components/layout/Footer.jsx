@@ -22,7 +22,10 @@ const Footer = () => {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
 
       {/* Atmospheric ambient glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[300px] bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[650px] h-[300px] rounded-full pointer-events-none -z-10"
+        style={{ background: "radial-gradient(ellipse, rgba(6,182,212,0.1) 0%, transparent 70%)" }}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-16 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 pb-12 border-b border-cyan-500/15">
@@ -108,24 +111,24 @@ const Footer = () => {
             </h3>
             <ul className="flex flex-col gap-2.5 text-xs sm:text-sm text-gray-400">
               <li>
-                <a href="/#about" className="hover:text-white transition-colors">
+                <Link to="/#about" className="hover:text-white transition-colors">
                   About Himanvic
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/#skills" className="hover:text-white transition-colors">
+                <Link to="/#skills" className="hover:text-white transition-colors">
                   Technical Skills
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/#projects" className="hover:text-white transition-colors">
+                <Link to="/#projects" className="hover:text-white transition-colors">
                   Featured Projects
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/#profile" className="hover:text-white transition-colors">
+                <Link to="/#profile" className="hover:text-white transition-colors">
                   Profile &amp; Dynamics
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

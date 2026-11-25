@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   SiCplusplus,
   SiPython,
@@ -9,13 +9,37 @@ import {
 import { VscCode } from "react-icons/vsc";
 
 const Skills = () => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !document.hidden) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="skills"
       className="relative w-full py-24 sm:py-32 md:py-40 overflow-hidden flex flex-col items-center justify-center z-10"
     >
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none" />
+      {/* Background ambient lighting (zero-blur CSS radial gradient) */}
+      <div
+        className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)" }}
+      />
 
       {/* Text Content */}
       <div className="relative z-20 text-center px-4 sm:px-6 max-w-5xl w-full flex flex-col items-center">
@@ -93,7 +117,7 @@ const Skills = () => {
         </div>
       </div>
 
-      {/* Cybernetic Background Wormhole Video (Recolored from Purple to Electric Cyan/Blue) */}
+      {/* Cybernetic Background Wormhole Video (Pauses automatically when off-screen) */}
       <div
         className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden"
         style={{
@@ -102,6 +126,7 @@ const Skills = () => {
         }}
       >
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted

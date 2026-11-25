@@ -208,18 +208,14 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
 
   return (
     <>
-      {/* Floating HUD Trigger Pill (Bottom Right Corner) */}
+      {/* Mobile-only Floating Terminal Trigger (Desktop uses the Navbar button) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 px-3.5 py-2 rounded-full bg-[#080d1e]/90 hover:bg-cyan-950/80 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono flex items-center gap-2 shadow-[0_0_25px_rgba(6,182,212,0.35)] backdrop-blur-xl transition-all hover:scale-105 cursor-pointer group"
-        title="Open Terminal (Ctrl + K)"
+        className="md:hidden fixed bottom-5 right-5 z-40 px-3 py-2 rounded-full bg-[#080d1e]/90 hover:bg-cyan-950/80 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono flex items-center gap-2 shadow-[0_0_25px_rgba(6,182,212,0.35)] backdrop-blur-xl transition-all hover:scale-105 cursor-pointer group"
+        title="Open Terminal"
       >
         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
         <FaTerminal className="text-xs group-hover:rotate-12 transition-transform" />
-        <span className="hidden sm:inline font-bold">Terminal</span>
-        <kbd className="hidden sm:inline px-1.5 py-0.5 rounded bg-black/60 border border-white/10 text-[10px] text-gray-400">
-          Ctrl K
-        </kbd>
       </button>
 
       {/* Terminal Modal Dialog */}
@@ -230,7 +226,7 @@ export const CommandPalette = ({ onOpenVisualizer }) => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl bg-[#060a17]/98 border border-cyan-500/40 rounded-3xl shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[85vh] cursor-default"
+            className="relative w-full max-w-2xl bg-[#060a17]/95 border border-cyan-500/40 rounded-3xl shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col max-h-[85vh] cursor-default"
           >
             {/* Terminal Header */}
             <div className="flex items-center justify-between px-5 py-3.5 bg-black/40 border-b border-cyan-500/20">

@@ -1,19 +1,25 @@
 // File Name: RealTimeEarthCore.jsx
-import React, { useRef, useEffect, useMemo, Suspense } from "react";
+import React, { useRef, useEffect, useMemo, useState, Suspense } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
+const computeUtcSunDirection = () => {
+  const now = new Date();
+  const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60;
+  const theta = (utcHours / 24) * Math.PI * 2;
+  return new THREE.Vector3(-Math.cos(theta), 0.25, -Math.sin(theta)).normalize();
+};
+
 /**
- * 3D Earth Mesh with Real-Time Day/Night Solar Terminator Shader
- * Scaled and optimized for the Hero Solar System Core.
+ * 3D Earth Mesh with Real-Time Day/Night Solar Terminator Shader.
+ * Surface stays locked to astronomical UTC coordinates while OrbitControls
+ * rotates smoothly around it, keeping the India beacon pinned accurately.
  */
-const EarthSphereMesh = ({ isHovered }) => {
-  const earthRef = useRef();
+const EarthSphereMesh = ({ isHovered, isActive }) => {
   const cloudsRef = useRef();
   const beaconRef = useRef();
 
-  // Load NASA textures from public assets
   const [dayMap, nightMap, cloudsMap, specularMap] = useLoader(THREE.TextureLoader, [
     "/assets/textures/earth/earth_day.jpg",
     "/assets/textures/earth/earth_night.jpg",
@@ -21,15 +27,8 @@ const EarthSphereMesh = ({ isHovered }) => {
     "/assets/textures/earth/earth_specular.jpg",
   ]);
 
-  // Calculate real-time sun directional vector based on actual computer UTC time
-  const sunDirection = useMemo(() => {
-    const now = new Date();
-    const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60;
-    const theta = (utcHours / 24) * Math.PI * 2;
-    return new THREE.Vector3(-Math.cos(theta), 0.25, -Math.sin(theta)).normalize();
-  }, []);
+  const sunDirection = useMemo(() => computeUtcSunDirection(), []);
 
-  // Custom Day/Night GLSL Shader Material
   const earthMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
@@ -73,10 +72,18 @@ const EarthSphereMesh = ({ isHovered }) => {
     });
   }, [dayMap, nightMap, specularMap, sunDirection]);
 
+  // Refresh solar terminator angle every 60s in real time
+  useEffect(() => {
+    const timer = setInterval(() => {
+      earthMaterial.uniforms.sunDirection.value.copy(computeUtcSunDirection());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [earthMaterial]);
+
   // Exact Cartesian coordinates for India on Three.js Sphere (20.59° N, 78.96° E)
   const indiaPos = useMemo(() => new THREE.Vector3(0.188, 0.344, -0.941), []);
 
-  // Cleanup WebGL textures on unmount to free VRAM
+  // Cleanup WebGL textures and shaders on unmount to free VRAM
   useEffect(() => {
     return () => {
       dayMap?.dispose();
@@ -88,12 +95,10 @@ const EarthSphereMesh = ({ isHovered }) => {
   }, [dayMap, nightMap, cloudsMap, specularMap, earthMaterial]);
 
   useFrame((state, delta) => {
-    const rotSpeed = isHovered ? 0.04 : 0.018;
-    if (earthRef.current) {
-      earthRef.current.rotation.y += delta * rotSpeed;
-    }
+    if (!isActive) return;
+    const cloudSpeed = isHovered ? 0.032 : 0.014;
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += delta * (rotSpeed * 1.35);
+      cloudsRef.current.rotation.y += delta * cloudSpeed;
     }
     if (beaconRef.current) {
       beaconRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 4.5) * 0.3);
@@ -101,9 +106,9 @@ const EarthSphereMesh = ({ isHovered }) => {
   });
 
   return (
-    <group scale={0.92}>
-      {/* 1. Earth Surface Mesh (Day/Night Shader) */}
-      <mesh ref={earthRef} material={earthMaterial}>
+    <group scale={0.94}>
+      {/* 1. Earth Surface Mesh (Day/Night Shader locked to real UTC coordinates) */}
+      <mesh material={earthMaterial}>
         <sphereGeometry args={[1, 48, 48]} />
       </mesh>
 
@@ -113,7 +118,7 @@ const EarthSphereMesh = ({ isHovered }) => {
         <meshStandardMaterial
           map={cloudsMap}
           transparent
-          opacity={0.55}
+          opacity={0.5}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -143,7 +148,7 @@ const EarthSphereMesh = ({ isHovered }) => {
         />
       </mesh>
 
-      {/* 4. India Location Beacon (Electric Cyan Pulsing Glow & Amber Core) */}
+      {/* 4. India Location Beacon (Pinned cleanly on India coordinates) */}
       <group position={indiaPos}>
         <mesh ref={beaconRef}>
           <sphereGeometry args={[0.024, 16, 16]} />
@@ -159,8 +164,32 @@ const EarthSphereMesh = ({ isHovered }) => {
 };
 
 export const RealTimeEarthCore = ({ isHovered }) => {
+  const containerRef = useRef(null);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    let isInView = true;
+    const syncState = () => setIsActive(isInView && !document.hidden);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        syncState();
+      },
+      { threshold: 0.05 }
+    );
+
+    if (containerRef.current) observer.observe(containerRef.current);
+    document.addEventListener("visibilitychange", syncState);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", syncState);
+    };
+  }, []);
+
   return (
-    <div className="w-full h-full relative cursor-pointer select-none">
+    <div ref={containerRef} className="w-full h-full relative cursor-grab active:cursor-grabbing select-none">
       <Suspense
         fallback={
           <div className="w-full h-full flex items-center justify-center">
@@ -169,6 +198,7 @@ export const RealTimeEarthCore = ({ isHovered }) => {
         }
       >
         <Canvas
+          frameloop={isActive ? "always" : "demand"}
           camera={{ position: [0.6, 0.4, -2.9], fov: 45 }}
           dpr={[1, 1.25]}
           gl={{
@@ -179,14 +209,14 @@ export const RealTimeEarthCore = ({ isHovered }) => {
           }}
           style={{ background: "transparent" }}
         >
-          <ambientLight intensity={0.18} />
-          <EarthSphereMesh isHovered={isHovered} />
+          <ambientLight intensity={0.22} />
+          <EarthSphereMesh isHovered={isHovered} isActive={isActive} />
           <OrbitControls
             enableZoom={false}
             enablePan={false}
-            autoRotate={true}
-            autoRotateSpeed={0.4}
-            rotateSpeed={0.5}
+            autoRotate={isActive}
+            autoRotateSpeed={isHovered ? 0.8 : 0.45}
+            rotateSpeed={0.55}
           />
         </Canvas>
       </Suspense>

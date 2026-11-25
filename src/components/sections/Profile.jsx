@@ -179,7 +179,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     const updateSize = () => {
       if (!canvas.parentElement) return;
@@ -229,6 +229,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
       ([entry]) => {
         isVisible = entry.isIntersecting;
         if (isVisible) {
+          lastSwitchTimeRef.current = performance.now();
           if (!animFrameRef.current) {
             animFrameRef.current = requestAnimationFrame(render);
           }
@@ -259,9 +260,9 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
         onWordChange(nextIndex);
       }
 
-      // Trail fade background
+      // Trail fade background matched cleanly to #050713 container
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgba(9, 11, 28, 0.28)";
+      ctx.fillStyle = "rgba(5, 7, 19, 0.28)";
       ctx.fillRect(0, 0, W, H);
 
       // Render expanding ripples from shockwave clicks
@@ -429,9 +430,15 @@ const Profile = () => {
       {/* Anchor for backward compatibility */}
       <div id="encryption" className="absolute -top-20" />
 
-      {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-cyan-600/12 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/3 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[130px] pointer-events-none" />
+      {/* Ambient background glows (zero-blur radial gradients) */}
+      <div
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute bottom-10 left-1/3 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(56,189,248,0.1) 0%, transparent 70%)" }}
+      />
 
       {/* Top Header & Badge */}
       <div className="flex flex-col items-center text-center z-10 max-w-3xl">
@@ -472,7 +479,7 @@ const Profile = () => {
             </span>
             <span className="text-gray-300 font-semibold">QUANTUM PARTICLE MORPH</span>
             <span className="hidden sm:inline text-cyan-400/60">•</span>
-            <span className="hidden sm:inline text-gray-400">1,800 Active Entities</span>
+            <span className="hidden sm:inline text-gray-400">{PARTICLE_COUNT} Active Entities</span>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
             <span className="hidden sm:inline">Hover to disperse</span>

@@ -15,7 +15,6 @@ const App = () => {
   const { scrollYProgress } = useScroll();
 
   useEffect(() => {
-    // scroll to the section if there's a hash in the URL
     if (location.hash) {
       const id = location.hash.replace('#', '');
       const element = document.getElementById(id);

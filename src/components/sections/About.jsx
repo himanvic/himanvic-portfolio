@@ -8,9 +8,15 @@ const About = () => {
       id="about"
       className="relative w-full py-24 sm:py-32 px-4 sm:px-6 lg:px-8 text-white z-10 flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background ambient lighting (zero-blur CSS radial gradients) */}
+      <div
+        className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)" }}
+      />
 
       <div className="max-w-6xl w-full mx-auto relative z-10">
         {/* Section Header: Proper Centered Stack */}
