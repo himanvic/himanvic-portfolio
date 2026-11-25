@@ -1,42 +1,54 @@
-import React, { useRef, useEffect, useState, Suspense } from "react";
+import React, { useRef, useEffect, useState, useMemo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
-import * as random from "maath/random";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
-// Optimized particle counts for buttery 60-120fps with minimal GPU VRAM & DDR4 footprint
-const TOTAL_DISTANT_STARS = 2200;
-const TOTAL_CYAN_SPARKS = 450;
-const TOTAL_AMBER_SPARKS = 200;
+const BASE_DISTANT_STARS = 2200;
+const BASE_CYAN_SPARKS = 450;
+const BASE_AMBER_SPARKS = 200;
 
 /**
- * 3D Deep Space Starfield with Interactive Mouse Gravity,
- * Click Gravitational Shockwaves, and Hyperspace Warp Speed.
- * Optimized with visibility pause, capped DPR, and zero preserveDrawingBuffer.
+ * Uniform 3D spherical point sampler (replaces maath dependency cleanly)
  */
-const StarFieldMesh = () => {
+const generateSpherePoints = (count, radius) => {
+  const arr = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const u = Math.random();
+    const v = Math.random();
+    const theta = u * 2 * Math.PI;
+    const phi = Math.acos(2 * v - 1);
+    const r = radius * Math.cbrt(Math.random());
+    const sinPhi = Math.sin(phi);
+    const offset = i * 3;
+    arr[offset] = r * sinPhi * Math.cos(theta);
+    arr[offset + 1] = r * sinPhi * Math.sin(theta);
+    arr[offset + 2] = r * Math.cos(phi);
+  }
+  return arr;
+};
+
+const StarFieldMesh = ({ starScale, isCoarsePointer }) => {
   const groupRef = useRef();
   const distantRef = useRef();
   const cyanRef = useRef();
   const amberRef = useRef();
 
   const [isPaused, setIsPaused] = useState(false);
-
-  // Mouse tracker with smooth lerp damping
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
-
-  // Gravitational pulse & warp speed multipliers
   const shockwaveRef = useRef(0);
   const warpSpeedRef = useRef(0);
 
-  // Generate sphere particle coordinates once
-  const distantPositions = useRef(
-    random.inSphere(new Float32Array(TOTAL_DISTANT_STARS * 3), { radius: 1.25 })
+  const distantPositions = useMemo(
+    () => generateSpherePoints(Math.round(BASE_DISTANT_STARS * starScale), 1.25),
+    [starScale]
   );
-  const cyanPositions = useRef(
-    random.inSphere(new Float32Array(TOTAL_CYAN_SPARKS * 3), { radius: 1.1 })
+  const cyanPositions = useMemo(
+    () => generateSpherePoints(Math.round(BASE_CYAN_SPARKS * starScale), 1.1),
+    [starScale]
   );
-  const amberPositions = useRef(
-    random.inSphere(new Float32Array(TOTAL_AMBER_SPARKS * 3), { radius: 0.95 })
+  const amberPositions = useMemo(
+    () => generateSpherePoints(Math.round(BASE_AMBER_SPARKS * starScale), 0.95),
+    [starScale]
   );
 
   useEffect(() => {
@@ -46,16 +58,13 @@ const StarFieldMesh = () => {
     };
 
     const handlePointerDown = () => {
-      // Trigger a gravitational compression shockwave on click
       shockwaveRef.current = 1.0;
     };
 
     const handleWarp = () => {
-      // Trigger hyperspace acceleration burst
       warpSpeedRef.current = 3.5;
     };
 
-    // Pause WebGL rendering loop when tab is hidden or 3D Earth modal is open
     const handleVisibility = () => {
       setIsPaused(document.hidden);
     };
@@ -64,36 +73,36 @@ const StarFieldMesh = () => {
       setIsPaused(!!(e.detail && e.detail.active));
     };
 
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    if (!isCoarsePointer) {
+      window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    }
     window.addEventListener("pointerdown", handlePointerDown, { passive: true });
     window.addEventListener("hyperspace-warp", handleWarp);
     document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("earth-modal-active", handleEarthActive);
+    window.addEventListener("toggle-earth-core", handleEarthActive);
 
     return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
+      if (!isCoarsePointer) {
+        window.removeEventListener("pointermove", handlePointerMove);
+      }
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("hyperspace-warp", handleWarp);
       document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("earth-modal-active", handleEarthActive);
+      window.removeEventListener("toggle-earth-core", handleEarthActive);
     };
-  }, []);
+  }, [isCoarsePointer]);
 
   useFrame((_state, delta) => {
-    // 0% GPU execution when paused in background or when Earth modal is active
     if (isPaused) return;
 
     const m = mouseRef.current;
-    // Smooth inertial spring damping
     m.x += (m.targetX - m.x) * 0.05;
     m.y += (m.targetY - m.y) * 0.05;
 
-    // Decay shockwave pulse
     if (shockwaveRef.current > 0) {
       shockwaveRef.current = Math.max(0, shockwaveRef.current - delta * 2.8);
     }
 
-    // Decay warp speed
     if (warpSpeedRef.current > 0) {
       warpSpeedRef.current = Math.max(0, warpSpeedRef.current - delta * 1.4);
     }
@@ -101,13 +110,11 @@ const StarFieldMesh = () => {
     const shockPulse = Math.sin(shockwaveRef.current * Math.PI) * 0.12;
     const warpBoost = warpSpeedRef.current * 4.5;
 
-    // 1. Group-level pulse & warp
     if (groupRef.current) {
       groupRef.current.scale.setScalar(1 + shockPulse);
       groupRef.current.rotation.z += delta * warpBoost * 0.3;
     }
 
-    // 2. Distant Starfield: Background drift + warp acceleration
     if (distantRef.current) {
       distantRef.current.rotation.x -= delta * (1 / 22 + warpBoost * 0.2);
       distantRef.current.rotation.y -= delta * (1 / 30 + warpBoost * 0.3);
@@ -116,7 +123,6 @@ const StarFieldMesh = () => {
       distantRef.current.position.z = shockPulse * 0.3;
     }
 
-    // 3. Cyan Cosmic Sparks: Higher sensitivity + radial expansion
     if (cyanRef.current) {
       cyanRef.current.rotation.x += delta * (1 / 18 + warpBoost * 0.25);
       cyanRef.current.rotation.y += delta * (1 / 24 + warpBoost * 0.35);
@@ -125,7 +131,6 @@ const StarFieldMesh = () => {
       cyanRef.current.scale.setScalar(1 + shockPulse * 1.5);
     }
 
-    // 4. Solar Amber Sparks: Orbital harmonic oscillation
     if (amberRef.current) {
       amberRef.current.rotation.x -= delta * (1 / 15 + warpBoost * 0.2);
       amberRef.current.rotation.y += delta * (1 / 20 + warpBoost * 0.3);
@@ -137,8 +142,7 @@ const StarFieldMesh = () => {
 
   return (
     <group ref={groupRef} rotation={[0, 0, Math.PI / 4]}>
-      {/* 1. Deep Celestial White Stars */}
-      <Points ref={distantRef} stride={3} positions={distantPositions.current} frustumCulled>
+      <Points ref={distantRef} stride={3} positions={distantPositions} frustumCulled>
         <PointMaterial
           transparent
           color="#ffffff"
@@ -149,8 +153,7 @@ const StarFieldMesh = () => {
         />
       </Points>
 
-      {/* 2. Electric Cyan Cosmic Sparks */}
-      <Points ref={cyanRef} stride={3} positions={cyanPositions.current} frustumCulled>
+      <Points ref={cyanRef} stride={3} positions={cyanPositions} frustumCulled>
         <PointMaterial
           transparent
           color="#00f0ff"
@@ -161,8 +164,7 @@ const StarFieldMesh = () => {
         />
       </Points>
 
-      {/* 3. Solar Amber Harmonic Sparks */}
-      <Points ref={amberRef} stride={3} positions={amberPositions.current} frustumCulled>
+      <Points ref={amberRef} stride={3} positions={amberPositions} frustumCulled>
         <PointMaterial
           transparent
           color="#facc15"
@@ -176,26 +178,42 @@ const StarFieldMesh = () => {
   );
 };
 
-export const StarsCanvas = () => (
-  <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none">
-    <Canvas
-      camera={{ position: [0, 0, 1] }}
-      dpr={[1, 1.25]}
-      gl={{
-        preserveDrawingBuffer: false,
-        antialias: false,
-        powerPreference: "low-power",
-      }}
-      onCreated={({ gl }) => {
-        gl.setClearColor("#000000", 0);
-      }}
-      style={{ background: "transparent" }}
-    >
-      <Suspense fallback={null}>
-        <StarFieldMesh />
-      </Suspense>
-    </Canvas>
-  </div>
-);
+export const StarsCanvas = () => {
+  const { tier, starScale, maxDpr, isCoarsePointer } = useDeviceCapabilities();
+
+  if (tier === "lite") {
+    return (
+      <div
+        className="fixed inset-0 -z-10 w-full h-full pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 25% 25%, rgba(6,182,212,0.06) 0%, transparent 45%), radial-gradient(circle at 75% 70%, rgba(250,204,21,0.04) 0%, transparent 45%), #000000",
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none">
+      <Canvas
+        camera={{ position: [0, 0, 1] }}
+        dpr={maxDpr === 1 ? 1 : [1, maxDpr]}
+        gl={{
+          preserveDrawingBuffer: false,
+          antialias: false,
+          powerPreference: "low-power",
+        }}
+        onCreated={({ gl }) => {
+          gl.setClearColor("#000000", 0);
+        }}
+        style={{ background: "transparent" }}
+      >
+        <Suspense fallback={null}>
+          <StarFieldMesh starScale={starScale} isCoarsePointer={isCoarsePointer} />
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+};
 
 export default StarsCanvas;

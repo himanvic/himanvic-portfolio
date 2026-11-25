@@ -2,57 +2,49 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
-/**
- * 3D Holographic Singularity Core
- * Combines a counter-rotating Icosahedron wireframe lattice,
- * an inner glowing Octahedron crystal, and an orbiting energy ring.
- * Optimized with viewport IntersectionObserver and capped DPR.
- */
-const CoreMesh = ({ isHovered, isVisible }) => {
+const CoreMesh = ({ isHovered, isVisible, isCoarsePointer, prefersReducedMotion }) => {
   const outerRef = useRef();
   const innerRef = useRef();
   const ringRef = useRef();
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (isCoarsePointer || prefersReducedMotion) return;
     const handlePointer = (e) => {
-      // Localized parallax based on screen position
       mouseRef.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseRef.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
     };
     window.addEventListener("pointermove", handlePointer, { passive: true });
     return () => window.removeEventListener("pointermove", handlePointer);
-  }, []);
+  }, [isCoarsePointer, prefersReducedMotion]);
 
   useFrame((state, delta) => {
-    // 0% GPU execution when Hero section is scrolled off-screen
-    if (!isVisible) return;
+    if (!isVisible || prefersReducedMotion) return;
 
     const speedMultiplier = isHovered ? 2.5 : 1.0;
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
 
-    // 1. Outer Icosahedron: slow rotation + mouse tilt
     if (outerRef.current) {
       outerRef.current.rotation.x += delta * 0.4 * speedMultiplier;
       outerRef.current.rotation.y += delta * 0.6 * speedMultiplier;
-      // Parallax tilt
-      outerRef.current.rotation.z = THREE.MathUtils.lerp(
-        outerRef.current.rotation.z,
-        mx * 0.4,
-        0.05
-      );
+      if (!isCoarsePointer) {
+        outerRef.current.rotation.z = THREE.MathUtils.lerp(
+          outerRef.current.rotation.z,
+          mx * 0.4,
+          0.05
+        );
+      }
     }
 
-    // 2. Inner Octahedron: reverse gyroscopic spin
     if (innerRef.current) {
       innerRef.current.rotation.x -= delta * 0.5 * speedMultiplier;
       innerRef.current.rotation.y -= delta * 0.8 * speedMultiplier;
       innerRef.current.rotation.z += delta * 0.3 * speedMultiplier;
     }
 
-    // 3. Orbital Energy Ring: precession wave
     if (ringRef.current) {
       ringRef.current.rotation.z += delta * 1.2 * speedMultiplier;
       ringRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 1.5) * 0.3 + my * 0.3;
@@ -61,7 +53,6 @@ const CoreMesh = ({ isHovered, isVisible }) => {
 
   return (
     <group scale={isHovered ? 1.15 : 1.0}>
-      {/* 1. Outer Glowing Electric Cyan Wireframe Icosahedron */}
       <mesh ref={outerRef}>
         <icosahedronGeometry args={[1.35, 0]} />
         <meshBasicMaterial
@@ -72,7 +63,6 @@ const CoreMesh = ({ isHovered, isVisible }) => {
         />
       </mesh>
 
-      {/* 2. Inner Dual-Tone Solar Amber & Cyan Gem Crystal */}
       <mesh ref={innerRef}>
         <octahedronGeometry args={[0.82, 0]} />
         <meshBasicMaterial
@@ -83,7 +73,6 @@ const CoreMesh = ({ isHovered, isVisible }) => {
         />
       </mesh>
 
-      {/* 3. Translucent Crystal Heart with Additive Glow */}
       <mesh>
         <octahedronGeometry args={[0.55, 0]} />
         <meshBasicMaterial
@@ -94,7 +83,6 @@ const CoreMesh = ({ isHovered, isVisible }) => {
         />
       </mesh>
 
-      {/* 4. Precessing Orbital Energy Ring */}
       <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
         <ringGeometry args={[1.6, 1.66, 32]} />
         <meshBasicMaterial
@@ -112,13 +100,12 @@ const CoreMesh = ({ isHovered, isVisible }) => {
 export const HoloCore3D = ({ isHovered }) => {
   const containerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(true);
+  const { maxDpr, isCoarsePointer, prefersReducedMotion } = useDeviceCapabilities();
 
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
+      ([entry]) => setIsVisible(entry.isIntersecting),
       { threshold: 0.05 }
     );
     observer.observe(containerRef.current);
@@ -128,8 +115,9 @@ export const HoloCore3D = ({ isHovered }) => {
   return (
     <div ref={containerRef} className="w-full h-full relative pointer-events-none">
       <Canvas
+        frameloop={isVisible && !prefersReducedMotion ? "always" : "demand"}
         camera={{ position: [0, 0, 3.8], fov: 45 }}
-        dpr={[1, 1.25]}
+        dpr={maxDpr === 1 ? 1 : [1, maxDpr]}
         gl={{
           antialias: true,
           alpha: true,
@@ -142,7 +130,12 @@ export const HoloCore3D = ({ isHovered }) => {
         style={{ background: "transparent" }}
       >
         <ambientLight intensity={0.5} />
-        <CoreMesh isHovered={isHovered} isVisible={isVisible} />
+        <CoreMesh
+          isHovered={isHovered}
+          isVisible={isVisible}
+          isCoarsePointer={isCoarsePointer}
+          prefersReducedMotion={prefersReducedMotion}
+        />
       </Canvas>
     </div>
   );

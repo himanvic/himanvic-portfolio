@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { slideInFromTop } from "../../utils/motion";
+import { useDeviceCapabilities } from "@/utils/deviceCapabilities";
 
 const WORDS = [
   {
@@ -46,9 +47,7 @@ const WORDS = [
   },
 ];
 
-const PARTICLE_COUNT = 900;
-
-const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
+const QuantumParticleCanvas = ({ activeIndex, onWordChange, particleCount, maxDpr, prefersReducedMotion }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const particlesRef = useRef([]);
@@ -179,7 +178,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
 
     const updateSize = () => {
       if (!canvas.parentElement) return;
@@ -196,23 +195,27 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
       applyWordMorph(activeIndexRef.current, 0.3);
     };
 
-    // Initialize particles array if empty
-    if (particlesRef.current.length === 0) {
+    // Populate/trim particles cleanly to match device tier count
+    if (particlesRef.current.length !== particleCount) {
       const initialTargets = getWordTargets(WORDS[0].name, 800, 380);
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const next = [];
+      for (let i = 0; i < particleCount; i++) {
         const t = initialTargets[i % initialTargets.length] || [400, 190];
-        particlesRef.current.push({
-          x: t[0] + (Math.random() - 0.5) * 100,
-          y: t[1] + (Math.random() - 0.5) * 100,
-          vx: (Math.random() - 0.5) * 4,
-          vy: (Math.random() - 0.5) * 4,
-          tx: t[0],
-          ty: t[1],
-          color: WORDS[0].colors[i % WORDS[0].colors.length],
-          size: Math.random() * 1.5 + 1.2,
-          seed: Math.random() * 1000,
-        });
+        next.push(
+          particlesRef.current[i] || {
+            x: t[0] + (Math.random() - 0.5) * 100,
+            y: t[1] + (Math.random() - 0.5) * 100,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            tx: t[0],
+            ty: t[1],
+            color: WORDS[0].colors[i % WORDS[0].colors.length],
+            size: Math.random() * 1.5 + 1.2,
+            seed: Math.random() * 1000,
+          }
+        );
       }
+      particlesRef.current = next;
     }
 
     updateSize();
@@ -333,7 +336,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
         ctx.fill();
       }
 
-      if (!isVisible) return;
+      if (!isVisible || prefersReducedMotion) return;
       animFrameRef.current = requestAnimationFrame(render);
     };
 
@@ -344,7 +347,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
     };
-  }, [applyWordMorph, getWordTargets, onWordChange]);
+  }, [applyWordMorph, getWordTargets, onWordChange, particleCount, maxDpr, prefersReducedMotion]);
 
   // When activeIndex changes from outside (e.g. pill click), trigger morph
   useEffect(() => {
@@ -419,6 +422,7 @@ const QuantumParticleCanvas = ({ activeIndex, onWordChange }) => {
 
 const Profile = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const { particleCount, maxDpr, prefersReducedMotion } = useDeviceCapabilities();
 
   const activeWord = WORDS[activeIndex] || WORDS[0];
 
@@ -479,7 +483,7 @@ const Profile = () => {
             </span>
             <span className="text-gray-300 font-semibold">QUANTUM PARTICLE MORPH</span>
             <span className="hidden sm:inline text-cyan-400/60">•</span>
-            <span className="hidden sm:inline text-gray-400">{PARTICLE_COUNT} Active Entities</span>
+            <span className="hidden sm:inline text-gray-400">{particleCount} Active Entities</span>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
             <span className="hidden sm:inline">Hover to disperse</span>
@@ -493,6 +497,9 @@ const Profile = () => {
           <QuantumParticleCanvas
             activeIndex={activeIndex}
             onWordChange={setActiveIndex}
+            particleCount={particleCount}
+            maxDpr={maxDpr}
+            prefersReducedMotion={prefersReducedMotion}
           />
 
           {/* Active word info overlay badge (bottom-left) */}
